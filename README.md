@@ -107,6 +107,26 @@ VENDOR: Device Manufacturer
 MAC: 00:11:22:33:44:55
 ```
 
+## 🔔 WiFi Notifier
+
+MoniPy includes a separate notification companion called `wifi_notifier.py` that works alongside the main scanner:
+
+### Features
+- **Real-time alerts**: Displays desktop notifications when devices connect or disconnect
+- **Background operation**: Runs as a separate process from the main scanner
+- **Low resource usage**: Efficiently processes notifications without impacting system performance
+
+### Usage
+Run the notifier in a separate terminal:
+```bash
+python3 wifi_notifier.py
+```
+
+The notifier communicates with the main scanner through a notification pipe, allowing it to display alerts without interrupting the scanner's operation. This separation ensures that notifications appear promptly while keeping the main interface clean.
+
+### Customization
+You can modify the notification appearance by editing the `wifi_notifier.py` file. The notifier respects the "ignore" settings in your device configuration, so you won't receive alerts for devices you've chosen to mute.
+
 ## 🛡️ Privacy & Security
 
 This tool only scans your local network. All data is stored locally in the `known_network_devices.json` file.

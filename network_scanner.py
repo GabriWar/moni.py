@@ -377,8 +377,8 @@ def main():
                         help="Don't clear the screen between scans")
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="Don't show notifications for existing devices on first run")
-    parser.add_argument("-f", "--fast", action="store_true",
-                        help="Use arp-scan for faster scanning")
+    parser.add_argument("--nmap-only", action="store_true",
+                        help="Use only nmap for scanning (slower but more detailed)")
     args = parser.parse_args()
     print("Arguments parsed successfully")
     
@@ -408,7 +408,7 @@ def main():
                 
                 # Scan network first (don't clear screen yet)
                 print(f"Scanning network {network_range}... (this may take a few seconds)")
-                discovered_devices = scan_network(network_range, args.fast)
+                discovered_devices = scan_network(network_range, args.nmap_only)
                 
                 # Update known devices database and get notifications
                 new_devices, disconnected_devices = update_known_devices(discovered_devices, known_devices)
