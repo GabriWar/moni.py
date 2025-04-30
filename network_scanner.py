@@ -218,16 +218,19 @@ def scan_with_nmap(network_range):
     
     return discovered_devices
 
-def scan_network(network_range, use_nmap_only=False):
+def scan_network(network_range, use_nmap_only=False, tables_only=False):
     """Choose the appropriate scan method based on settings"""
     if use_nmap_only:
-        print("Using nmap scan mode...")
+        if not tables_only:
+            print("Using nmap scan mode...")
         return scan_with_nmap(network_range)
     else:
-        print("Using arp-scan (fast mode)...")
+        if not tables_only:
+            print("Using arp-scan (fast mode)...")
         devices = scan_with_arp()
         if not devices:
-            print("No devices found with arp-scan. Falling back to nmap...")
+            if not tables_only:
+                print("No devices found with arp-scan. Falling back to nmap...")
             devices = scan_with_nmap(network_range)
         return devices
 
@@ -379,6 +382,8 @@ def main():
                         help="Don't show notifications for existing devices on first run")
     parser.add_argument("--nmap-only", action="store_true",
                         help="Use only nmap for scanning (slower but more detailed)")
+    parser.add_argument("-t", "--tables-only", action="store_true",
+                        help="Print only tables without scan statistics and status messages")
     args = parser.parse_args()
     print("Arguments parsed successfully")
     
@@ -407,8 +412,9 @@ def main():
                 last_scan_time = current_time
                 
                 # Scan network first (don't clear screen yet)
-                print(f"Scanning network {network_range}... (this may take a few seconds)")
-                discovered_devices = scan_network(network_range, args.nmap_only)
+                if not args.tables_only:
+                    print(f"Scanning network {network_range}... (this may take a few seconds)")
+                discovered_devices = scan_network(network_range, args.nmap_only, args.tables_only)
                 
                 # Update known devices database and get notifications
                 new_devices, disconnected_devices = update_known_devices(discovered_devices, known_devices)
@@ -477,7 +483,7 @@ def main():
                     print("└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘")
                 
                 # Display arp-scan statistics if available (from fast scan mode)
-                if args.fast and discovered_devices and "scan_stats" in discovered_devices[0]:
+                if not args.tables_only and not args.nmap_only and discovered_devices and "scan_stats" in discovered_devices[0]:
                     print("\nScan Statistics:")
                     print(discovered_devices[0]["scan_stats"])
                 
@@ -493,7 +499,7 @@ def main():
                 
                 # Print status summary footer
                 print(f"\nStatus: {len(discovered_devices)} connected, {len(recent_disconnected)} recently disconnected")
-                print(f"Auto-refresh every {scan_interval}s (Ctrl+C to exit)")
+                print(f"Auto-refresh every {scan_interval}s")
                 
                 first_run = False
             

@@ -55,7 +55,7 @@ cd network-scanner
 
 2. Run the scanner:
 ```bash
-python3 network_scanner.py -f
+python3 network_scanner.py
 ```
 
 ## 🎮 Usage
@@ -67,7 +67,8 @@ Options:
   -i, --interval SEC   Scan interval in seconds (default: 30)
   -n, --no-clear       Don't clear the screen between scans
   -q, --quiet          Don't show notifications for existing devices on first run
-  -f, --fast           Use arp-scan for faster scanning (recommended)
+  -t, --tables-only    Print only tables without scan statistics and status messages
+  --nmap-only          Use only nmap for scanning (slower but more detailed)
 ```
 
 ## 🔧 Configuration
