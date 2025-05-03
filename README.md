@@ -65,9 +65,10 @@ python3 network_scanner.py [options]
 
 Options:
   -i, --interval SEC   Scan interval in seconds (default: 30)
-  -n, --no-clear       Don't clear the screen between scans
+  -n, --notify         Enable desktop notifications for device changes
   -q, --quiet          Don't show notifications for existing devices on first run
   -t, --tables-only    Print only tables without scan statistics and status messages
+  -w, --waybar         Output JSON for Waybar with connected devices and tooltip
   --nmap-only          Use only nmap for scanning (slower but more detailed)
 ```
 
@@ -107,26 +108,6 @@ IP: 192.168.1.100
 VENDOR: Device Manufacturer
 MAC: 00:11:22:33:44:55
 ```
-
-## 🔔 WiFi Notifier
-
-MoniPy includes a separate notification companion called `wifi_notifier.py` that works alongside the main scanner:
-
-### Features
-- **Real-time alerts**: Displays desktop notifications when devices connect or disconnect
-- **Background operation**: Runs as a separate process from the main scanner
-- **Low resource usage**: Efficiently processes notifications without impacting system performance
-
-### Usage
-Run the notifier in a separate terminal:
-```bash
-python3 wifi_notifier.py
-```
-
-The notifier communicates with the main scanner through a notification pipe, allowing it to display alerts without interrupting the scanner's operation. This separation ensures that notifications appear promptly while keeping the main interface clean.
-
-### Customization
-You can modify the notification appearance by editing the `wifi_notifier.py` file. The notifier respects the "ignore" settings in your device configuration, so you won't receive alerts for devices you've chosen to mute.
 
 ## 🛡️ Privacy & Security
 

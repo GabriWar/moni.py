@@ -7,11 +7,11 @@ import subprocess
 import time
 import json
 from datetime import datetime, timedelta
+subprocess.run(["notify-send", "starting network monitor"], check=True)
 
 # File to store known devices (save in the same directory as the script)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 KNOWN_DEVICES_FILE = os.path.join(SCRIPT_DIR, "known_network_devices.json")
-NOTIFICATION_PIPE = '/tmp/wifi_monitor_pipe'
 
 def load_known_devices():
     """Load known devices from the JSON file"""
@@ -234,50 +234,29 @@ def scan_network(network_range, use_nmap_only=False, tables_only=False):
             devices = scan_with_nmap(network_range)
         return devices
 
-def create_or_check_pipe():
-    """Create the FIFO pipe if it doesn't exist and ensure it has proper permissions"""
-    if not os.path.exists(NOTIFICATION_PIPE):
-        try:
-            os.mkfifo(NOTIFICATION_PIPE)
-            print(f"Created notification pipe at {NOTIFICATION_PIPE}")
-        except Exception as e:
-            print(f"Error creating pipe: {e}")
-    
-    # Set permissions to be readable and writable by everyone
-    try:
-        os.chmod(NOTIFICATION_PIPE, 0o666)
-    except Exception as e:
-        print(f"Error setting pipe permissions: {e}")
-
 def send_notification(title, message):
-    """Send a notification through the pipe for the notifier script to display"""
+    """Send a desktop notification using notify-send"""
     try:
-        # Ensure pipe exists with correct permissions
-        create_or_check_pipe()
-        
-        # Write the notification as JSON to the pipe
-        notification_data = json.dumps({"title": title, "message": message}) + "\n"
-        with open(NOTIFICATION_PIPE, 'w') as pipe:
-            pipe.write(notification_data)
-            pipe.flush()
-        print(f"👉 {title}: {message}")
+        subprocess.run(["notify-send", title, message], check=True)
     except Exception as e:
-        print(f"Notification error: {e}")
+        print(f"Failed to send notification: {e}")
 
-def update_known_devices(discovered_devices, known_devices):
+def update_known_devices(discovered_devices, known_devices, notify=False, args=None):
     """Update the known devices database with newly discovered devices"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now()
+    debounce_time = 6  # seconds - debounce period for connect/disconnect
     new_devices = []
     disconnected_devices = []
     current_device_ids = set()
-    
-    # First, check for new connections
+
+    # Process each discovered device
     for device in discovered_devices:
         device_id = device["mac"] if device["mac"] != "Unknown" else device["ip"]
         current_device_ids.add(device_id)
-        
+
         if device_id not in known_devices:
-            # This is a new device
+            # This is an unknown device
             known_devices[device_id] = {
                 "ip": device["ip"],
                 "hostname": device["hostname"],
@@ -286,109 +265,119 @@ def update_known_devices(discovered_devices, known_devices):
                 "name": "",  # User can set this later
                 "first_seen": timestamp,
                 "last_seen": timestamp,
-                "status": "connected"
+                "status": "connected",
+                "ignore": False  # Default to not ignored
             }
             new_devices.append(device_id)
-            
-            # Prepare notification details
-            device_name = device["hostname"] if device["hostname"] != "Unknown" else device["ip"]
-            vendor_info = f" ({device['vendor']})" if device["vendor"] != "Unknown vendor" else ""
-            mac_info = f" [{device['mac']}]" if device["mac"] != "Unknown" else ""
-            
-            # Send notification for new device (if not ignored)
-            if not known_devices.get(device_id, {}).get("ignore", False):
-                notification_msg = f"NAME: {device_name}\nIP: {device['ip']}"
-                if device["vendor"] != "Unknown vendor":
-                    notification_msg += f"\nVENDOR: {device['vendor']}"
-                notification_msg += f"\nMAC: {device['mac']}"
-                
-                send_notification("New Device Connected", notification_msg)
+
+            # Notify about the unknown device if not ignored
+            if not known_devices[device_id]["ignore"]:
+                message = f"IP: {device['ip']}\nMAC: {device['mac']}\nVENDOR: {device['vendor']}\nLAST SEEN: {timestamp}"
+
+                if not (args.tables_only or args.waybar):
+                    print("\nUNKNOWN DEVICE CONNECTED")
+                    print(message)
+                if notify:
+                    send_notification("UNKNOWN DEVICE CONNECTED", message)
         else:
+            old_status = known_devices[device_id].get("status", "")
             # Update existing device
-            old_status = known_devices[device_id].get("status", "unknown")
             known_devices[device_id]["last_seen"] = timestamp
             known_devices[device_id]["ip"] = device["ip"]
-            known_devices[device_id]["status"] = "connected"
+            
+            # Only update the status if it's different, this prevents notifications for devices that remain connected
+            if old_status != "connected":
+                known_devices[device_id]["status"] = "connected"
             
             if device["hostname"] != "Unknown":
                 known_devices[device_id]["hostname"] = device["hostname"]
             if device["mac"] != "Unknown":
                 known_devices[device_id]["mac"] = device["mac"]
                 known_devices[device_id]["vendor"] = device["vendor"]
+
+            # Notify about the known device if not ignored and wasn't already connected
+            if old_status != "connected" and not known_devices[device_id]["ignore"]:
+                # Check if this device was recently disconnected (within debounce time)
+                # If it was, don't notify about reconnection
+                last_disconnect_time = known_devices[device_id].get("disconnect_time")
+                if last_disconnect_time:
+                    # Convert string timestamp to datetime object
+                    try:
+                        disconnect_datetime = datetime.strptime(last_disconnect_time, "%Y-%m-%d %H:%M:%S")
+                        # If device disconnected within debounce window, skip notification
+                        if (now - disconnect_datetime).total_seconds() < debounce_time:
+                            # Still update status but skip notification
+                            continue
+                    except (ValueError, TypeError):
+                        # If timestamp format is invalid, proceed with notification
+                        pass
                 
-            # If was previously disconnected, notify of reconnection
-            if old_status == "disconnected":
-                device_name = known_devices[device_id].get("name", "") or device["hostname"] 
-                if device_name == "Unknown":
-                    device_name = device["ip"]
-                vendor_info = f" ({device['vendor']})" if device["vendor"] != "Unknown vendor" else ""
-                
-                # Send reconnection notification (if not ignored)
-                if not known_devices[device_id].get("ignore", False):
-                    notification_msg = f"NAME: {device_name}\nIP: {device['ip']}"
-                    if device["vendor"] != "Unknown vendor":
-                        notification_msg += f"\nVENDOR: {device['vendor']}"
-                    notification_msg += f"\nMAC: {device['mac']}"
-                    
-                    send_notification("Device Reconnected", notification_msg)
-    
+                device_name = known_devices[device_id].get("name", "")
+                message = f"IP: {device['ip']}\nMAC: {device['mac']}\nVENDOR: {device['vendor']}\nLAST SEEN: {timestamp}"
+                if not (args.tables_only or args.waybar):
+                    print("\nKNOWN DEVICE CONNECTED")
+                    if device_name:
+                        print(f"NAME: {device_name}")
+                    print(message)
+                if notify:
+                    if device_name:
+                        message = f"NAME: {device_name}\n" + message
+                    send_notification("KNOWN DEVICE CONNECTED", message)
+
     # Now check for disconnected devices - devices in database but not in current scan
-    # Only consider devices seen in the last 24 hours to avoid noise from old entries
-    recent_time = (datetime.now() - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
-    
+    # Get all previously connected devices
     for device_id, info in known_devices.items():
-        if (device_id not in current_device_ids and 
-                info.get("status", "") != "disconnected" and 
-                info.get("last_seen", "") >= recent_time):
-            
+        if info.get("status") == "connected" and device_id not in current_device_ids:
             # Mark as disconnected
             known_devices[device_id]["status"] = "disconnected"
+            # Record when the device disconnected (for debounce)
+            known_devices[device_id]["disconnect_time"] = timestamp
             disconnected_devices.append(device_id)
-            
-            # Prepare notification
-            device_name = info.get("name", "") or info.get("hostname", "")
-            if device_name == "Unknown" or not device_name:
-                device_name = info.get("ip", "Unknown device")
-            vendor_info = f" ({info.get('vendor', '')})" if info.get("vendor", "") != "Unknown vendor" else ""
-            mac_info = f" [{info.get('mac', '')}]" if info.get("mac", "") != "Unknown" else ""
-            
-            # Send disconnection notification (if not ignored)
+
+            # Notify about the disconnected device if not ignored
             if not info.get("ignore", False):
-                notification_msg = f"NAME: {device_name}\nIP: {info.get('ip', 'Unknown')}"
-                if info.get("vendor", "Unknown vendor") != "Unknown vendor":
-                    notification_msg += f"\nVENDOR: {info.get('vendor', '')}"
-                notification_msg += f"\nMAC: {info.get('mac', 'Unknown')}"
-                
-                send_notification("Device Disconnected", notification_msg)
-    
+                device_name = info.get("name", "")
+                message = f"IP: {info.get('ip', 'Unknown')}\nMAC: {info.get('mac', 'Unknown')}\nVENDOR: {info.get('vendor', 'Unknown')}\nLAST SEEN: {info.get('last_seen', 'Unknown')}"
+                if not (args.tables_only or args.waybar):
+                    print("\nKNOWN DEVICE DISCONNECTED")
+                    if device_name:
+                        print(f"NAME: {device_name}")
+                    print(message)
+                if notify:
+                    if device_name:
+                        message = f"NAME: {device_name}\n" + message
+                    send_notification("KNOWN DEVICE DISCONNECTED", message)
+
     # Save the updated known devices
     save_known_devices(known_devices)
-    
+
     return new_devices, disconnected_devices
 
 def main():
-    # Add initial debug output
-    print("Starting network scanner...")
-    
     # Parse command line arguments
     import argparse
     
     parser = argparse.ArgumentParser(description="Simple Network Scanner")
     parser.add_argument("-i", "--interval", type=int, default=30, 
                         help="Scan interval in seconds (default: 30)")
-    parser.add_argument("-n", "--no-clear", action="store_true",
-                        help="Don't clear the screen between scans")
+    parser.add_argument("-n", "--notify", action="store_true",
+                        help="Enable desktop notifications for device changes")
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="Don't show notifications for existing devices on first run")
     parser.add_argument("--nmap-only", action="store_true",
                         help="Use only nmap for scanning (slower but more detailed)")
     parser.add_argument("-t", "--tables-only", action="store_true",
                         help="Print only tables without scan statistics and status messages")
+    parser.add_argument("-w", "--waybar", action="store_true",
+                        help="Output JSON for Waybar with connected devices and tooltip")
     args = parser.parse_args()
-    print("Arguments parsed successfully")
-    
-    # Create or check notification pipe
-    create_or_check_pipe()
+     ##if waybar is set print text and tooltip starting in json
+    if args.waybar:
+        waybar_output = {
+                                "text": "...",
+                                "tooltip": "starting network monitor"
+                            }
+        print(json.dumps(waybar_output, ensure_ascii=False)) 
     
     # Get the network range to scan
     network_range = get_network_range()
@@ -415,99 +404,133 @@ def main():
                 if not args.tables_only:
                     print(f"Scanning network {network_range}... (this may take a few seconds)")
                 discovered_devices = scan_network(network_range, args.nmap_only, args.tables_only)
-                
+
                 # Update known devices database and get notifications
-                new_devices, disconnected_devices = update_known_devices(discovered_devices, known_devices)
-                
+                new_devices, disconnected_devices = update_known_devices(
+                    discovered_devices, known_devices, notify=args.notify, args=args
+                )
+
                 # Now clear the screen before displaying results
-                if not args.no_clear:
+                if not args.notify:
                     clear_screen()
-                
-                # Create a clean table format for displaying results
-                print(f"Connected devices: {len(discovered_devices)}")
-                
-                # Count total known devices (connected & disconnected)
-                total_known = len([d for d in known_devices.values() 
-                                  if d.get("last_seen", "") >= 
-                                     (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")])
-                
-                # Table headers (with wider vendor column)
-                print("\n┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐")
-                print("│ IP Address      │ MAC Address         │ Vendor                                   │ Name            │")
-                print("├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤")
-                
-                # Print connected devices in a table
-                for device in discovered_devices:
-                    ip = device["ip"]
-                    mac = device["mac"] if device["mac"] != "Unknown" else "Unknown MAC"
-                    vendor = device["vendor"]
-                    if len(vendor) > 38:
-                        vendor = vendor[:35] + "..."
-                    
-                    # Get custom name if set in known devices
-                    device_id = device["mac"] if device["mac"] != "Unknown" else device["ip"]
-                    name = known_devices.get(device_id, {}).get("name", "")
-                    
-                    print(f"│ {ip:<15} │ {mac:<19} │ {vendor:<40} │ {name:<15} │")
-                
-                # Table footer
-                print("└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘")
-                
-                # Display recently disconnected devices in a table
+
+                # Get recent disconnected devices (those disconnected in the last 20 minutes)
+                twenty_min_ago = (datetime.now() - timedelta(minutes=20)).strftime("%Y-%m-%d %H:%M:%S")
                 recent_disconnected = [
                     (d_id, info) for d_id, info in known_devices.items() 
                     if info.get("status") == "disconnected" and
-                    info.get("last_seen", "") >= (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+                    info.get("last_seen", "") >= twenty_min_ago
                 ]
-                
-                if recent_disconnected:
-                    print("\nRecently Disconnected Devices:")
-                    print("┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐")
-                    print("│ IP Address      │ MAC Address         │ Vendor                                   │ Name/Host       │")
+
+                if args.waybar:
+                    # Prepare the connected devices table as a single string
+                    connected_table_header = (
+                        "┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐\n"
+                        "│ IP Address      │ MAC Address         │ Vendor                                   │ Name            │\n"
+                        "├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤\n"
+                    )
+                    connected_table_rows = "\n".join([
+                        f"│ {'#' + device['ip'] if known_devices.get(device['mac'] if device['mac'] != 'Unknown' else device['ip'], {}).get('ignore', False) else device['ip']:<15} │ {device['mac']:<19} │ {device['vendor']:<40} │ {known_devices.get(device['mac'] if device['mac'] != 'Unknown' else device['ip'], {}).get('name', 'Unknown'):<15} │"
+                        for device in discovered_devices
+                    ])
+                    connected_table_footer = "\n└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘"
+                    connected_table = connected_table_header + connected_table_rows + connected_table_footer
+
+                    # Prepare the disconnected devices table as a single string
+                    disconnected_table_header = (
+                        "\nRecently Disconnected Devices:\n"
+                        "┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐\n"
+                        "│ IP Address      │ MAC Address         │ Vendor                                   │ Name/Host       │\n"
+                        "├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤\n"
+                    )
+                    disconnected_table_rows = "\n".join([
+                        f"│ {'#' + info.get('ip', 'Unknown') if info.get('ignore', False) else info.get('ip', 'Unknown'):<15} │ {info.get('mac', 'Unknown'):<19} │ {info.get('vendor', 'Unknown vendor'):<40} │ {info.get('name', 'Unknown') or info.get('hostname', 'Unknown'):<15} │"
+                        for _, info in recent_disconnected
+                    ])
+                    disconnected_table_footer = "\n└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘"
+                    disconnected_table = disconnected_table_header + disconnected_table_rows + disconnected_table_footer
+
+                    # Combine both tables
+                    full_tooltip = connected_table + disconnected_table
+
+                    # Prepare JSON output for Waybar
+                    waybar_output = {
+                        "text": str(len([device for device in discovered_devices if not known_devices.get(device['mac'] if device['mac'] != 'Unknown' else device['ip'], {}).get('ignore', False)])),
+                        "tooltip": full_tooltip
+                    }
+                    print(json.dumps(waybar_output, ensure_ascii=False))
+                    continue  # Skip the rest of the loop for Waybar output
+
+                # Suppress console output for connected and disconnected devices
+                if not args.waybar:
+                    # Create a clean table format for displaying results
+                    print(f"Connected devices: {len(discovered_devices)}")
+
+                    # Count total known devices (connected & disconnected)
+                    total_known = len([d for d in known_devices.values() 
+                                      if d.get("last_seen", "") >= 
+                                         (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")])
+
+                    # Table headers (with wider vendor column)
+                    print("\n┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐")
+                    print("│ IP Address      │ MAC Address         │ Vendor                                   │ Name            │")
                     print("├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤")
-                    
-                    for device_id, info in recent_disconnected:
-                        ip = info.get("ip", "Unknown")
-                        mac = info.get("mac", "Unknown")
-                        vendor = info.get("vendor", "Unknown vendor")
+
+                    # Print connected devices in a table
+                    for device in discovered_devices:
+                        ip = device["ip"]
+                        mac = device["mac"] if device["mac"] != "Unknown" else "Unknown MAC"
+                        vendor = device["vendor"]
                         if len(vendor) > 38:
                             vendor = vendor[:35] + "..."
-                        
-                        # Use name if available, otherwise hostname
-                        device_name = info.get("name", "") or info.get("hostname", "")
-                        if not device_name or device_name == "Unknown":
-                            device_name = ""
-                        
-                        print(f"│ {ip:<15} │ {mac:<19} │ {vendor:<40} │ {device_name:<15} │")
-                    
+
+                        # Get custom name if set in known devices
+                        device_id = device["mac"] if device["mac"] != "Unknown" else device["ip"]
+                        name = known_devices.get(device_id, {}).get("name", "")
+
+                        print(f"│ {ip:<15} │ {mac:<19} │ {vendor:<40} │ {name:<15} │")
+
+                    # Table footer
                     print("└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘")
-                
+
+                    # Display recently disconnected devices in a table
+                    if recent_disconnected:
+                        print("\nRecently Disconnected Devices:")
+                        print("┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐")
+                        print("│ IP Address      │ MAC Address         │ Vendor                                   │ Name/Host       │")
+                        print("├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤")
+
+                        for device_id, info in recent_disconnected:
+                            ip = info.get("ip", "Unknown")
+                            mac = info.get("mac", "Unknown")
+                            vendor = info.get("vendor", "Unknown vendor")
+                            if len(vendor) > 38:
+                                vendor = vendor[:35] + "..."
+
+                            # Use name if available, otherwise hostname
+                            device_name = info.get("name", "") or info.get("hostname", "")
+                            if not device_name or device_name == "Unknown":
+                                device_name = ""
+
+                            print(f"│ {ip:<15} │ {mac:<19} │ {vendor:<40} │ {device_name:<15} │")
+
+                        print("└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘")
+
                 # Display arp-scan statistics if available (from fast scan mode)
                 if not args.tables_only and not args.nmap_only and discovered_devices and "scan_stats" in discovered_devices[0]:
                     print("\nScan Statistics:")
                     print(discovered_devices[0]["scan_stats"])
-                
-                # Notifications for connection/disconnection events
-                current_events = []
-                if new_devices and not first_run:
-                    current_events.append(f"🟢 New devices: {len(new_devices)}")
-                if disconnected_devices and not first_run:
-                    current_events.append(f"🔴 Disconnected: {len(disconnected_devices)}")
-                
-                if current_events:
-                    print("\n" + " | ".join(current_events))
-                
+
                 # Print status summary footer
                 print(f"\nStatus: {len(discovered_devices)} connected, {len(recent_disconnected)} recently disconnected")
                 print(f"Auto-refresh every {scan_interval}s")
-                
+
                 first_run = False
-            
+
             # Sleep to reduce CPU usage
             time.sleep(1)
-            
-    except KeyboardInterrupt:
-        print("\nExiting network scanner.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
