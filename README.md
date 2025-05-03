@@ -1,123 +1,156 @@
-# 🔍 MoniPy
+# NetMon - Advanced Network Monitoring Tool 🛡️🔍
 
-A powerful, real-time network monitoring tool that keeps track of all devices on your local network.
+A powerful, lightweight network scanning and monitoring utility designed for Linux systems. NetMon helps you track devices connecting to your network in real-time with detailed information and notifications.
 
-![Network Scanner Banner](https://img.shields.io/badge/Network-Scanner-blue?style=for-the-badge&logo=wifi&logoColor=white)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## ✨ Features
+## Features ✨
 
-- **Real-time device detection** - Instantly identify new devices that connect to your network
-- **Fast Scanning** - Uses both `arp-scan` (fast) and `nmap` (thorough) scanning methods
-- **Beautiful Tables** - Clear, formatted display of connected and recently disconnected devices
-- **Desktop Notifications** - Get alerts when devices connect or disconnect
-- **Device Tracking** - Maintains history of all known devices
-- **Vendor Identification** - Identifies device manufacturers from MAC addresses
-- **Custom Naming** - Name your devices for easy identification
+- **Network Discovery**: Automatically detect all devices on your local network
+- **Device Tracking**: Monitor device connections and disconnections
+- **Vendor Identification**: Identify device manufacturers using MAC address lookup
+- **Real-time Notifications**: Get alerts when new devices connect to your network
+- **Intensive Scanning**: Run detailed port scans on the entire network with live progress display
+- **Persistent Storage**: Save device history between runs
+- **Flexible Output**: View results in table format with uptime information
+- **Scheduling**: Run scans at regular intervals
 
-## 📸 Screenshots
-
-```
-Connected devices: 5
-
-┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐
-│ IP Address      │ MAC Address         │ Vendor                                   │ Name            │
-├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤
-│ 192.168.3.1     │ 78:c5:f8:98:de:13   │ Huawei Device Co., Ltd.                  │ Router          │
-│ 192.168.3.52    │ f8:ff:c2:89:05:be   │ Apple, Inc.                              │ iPhone          │
-│ 192.168.3.74    │ f0:7d:f7:a6:30:6c   │ Unknown                                  │ Laptop          │
-│ 192.168.3.200   │ 2e:67:af:3c:8e:2c   │ Unknown: locally administered            │ Smart TV        │
-│ 192.168.3.235   │ b4:fb:e3:d6:de:9d   │ AltoBeam (China) Inc.                    │                 │
-└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘
-
-Recently Disconnected Devices:
-┌─────────────────┬─────────────────────┬──────────────────────────────────────────┬─────────────────┐
-│ IP Address      │ MAC Address         │ Vendor                                   │ Name/Host       │
-├─────────────────┼─────────────────────┼──────────────────────────────────────────┼─────────────────┤
-│ 192.168.3.110   │ 5c:96:9d:65:fe:c2   │ Apple, Inc.                              │ iPad            │
-└─────────────────┴─────────────────────┴──────────────────────────────────────────┴─────────────────┘
-```
-
-## 🚀 Installation
-
-### Prerequisites
+## Requirements 📋
 
 - Python 3.6+
-- nmap (`sudo apt install nmap`)  
-- arp-scan (`sudo apt install arp-scan`)
+- Nmap
+- Root/sudo privileges (required for proper network scanning)
+- Linux/Unix environment (tested on Ubuntu/Debian)
 
-### Setup
+## Installation 🚀
 
 1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/netmon.git
+   cd netmon
+   ```
+
+2. Install required dependencies:
+   ```bash
+   sudo apt-get install nmap
+   pip install requests
+   ```
+
+3. Make the scripts executable:
+   ```bash
+   chmod +x netmon.py notifier.py
+   ```
+
+## Usage 🖥️
+
+### Basic Network Scan
+
 ```bash
-git clone https://your-repo-url/network-scanner.git
-cd network-scanner
+sudo ./netmon.py
 ```
 
-2. Run the scanner:
+### View Connected Devices in Table Format
+
 ```bash
-python3 network_scanner.py
+sudo ./netmon.py -T
 ```
 
-## 🎮 Usage
+### Continuous Monitoring (every 60 seconds)
 
-```
-python3 network_scanner.py [options]
-
-Options:
-  -i, --interval SEC   Scan interval in seconds (default: 30)
-  -n, --notify         Enable desktop notifications for device changes
-  -q, --quiet          Don't show notifications for existing devices on first run
-  -t, --tables-only    Print only tables without scan statistics and status messages
-  -w, --waybar         Output JSON for Waybar with connected devices and tooltip
-  --nmap-only          Use only nmap for scanning (slower but more detailed)
+```bash
+sudo ./netmon.py -i 60 -T
 ```
 
-## 🔧 Configuration
+### Intensive Network Scan with Progress Display
 
-The scanner creates a `known_network_devices.json` file that stores information about all devices it discovers. You can customize device names and other settings by editing this file.
-
-### Sample device entry:
-
-```json
-"00:11:22:33:44:55": {
-  "ip": "192.168.1.100",
-  "hostname": "device-hostname",
-  "mac": "00:11:22:33:44:55",
-  "vendor": "Device Manufacturer",
-  "name": "My Device",
-  "first_seen": "2025-04-29 10:00:00",
-  "last_seen": "2025-04-29 10:30:00",
-  "status": "connected",
-  "ignore": false
-}
+```bash
+sudo ./netmon.py -I
 ```
 
-Set `"ignore": true` to disable notifications for specific devices.
+### Update Device Vendor Information
 
-## 📱 Notifications
-
-Get desktop notifications when:
-- New devices connect
-- Known devices reconnect
-- Devices disconnect
-
-Notification format:
-```
-NAME: device-name
-IP: 192.168.1.100
-VENDOR: Device Manufacturer
-MAC: 00:11:22:33:44:55
+```bash
+sudo ./netmon.py -H
 ```
 
-## 🛡️ Privacy & Security
+### Enable Real-time Notifications
 
-This tool only scans your local network. All data is stored locally in the `known_network_devices.json` file.
+In one terminal:
+```bash
+./notifier.py
+```
 
-## 📋 License
+In another terminal:
+```bash
+sudo ./netmon.py -N -i 30
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Command Line Options 🛠️
 
-## 🙏 Acknowledgements
+### NetMon Options
 
-- Uses `nmap` and `arp-scan` for device discovery
-- Built with Python and love ❤️
+| Option | Description |
+|--------|-------------|
+| `-D`, `--debug` | Enable debug output |
+| `-i SECONDS`, `--interval SECONDS` | Scan interval in seconds (default: run once) |
+| `-T`, `--table` | Print a table of connected hosts |
+| `-C`, `--clear` | Clear screen before each output |
+| `-N`, `--notify` | Send notifications when devices connect/disconnect |
+| `-S PATH`, `--socket PATH` | Path to notification socket (default: /tmp/netmon_socket) |
+| `-H`, `--rescan-hosts` | Force rescan of MAC, hostname and vendor info for all devices |
+| `-I`, `--intensive-scan` | Perform intensive nmap scan on the entire network |
+| `-U`, `--update-vendors-only` | Update MAC vendor information only |
+
+### Notifier Options
+
+| Option | Description |
+|--------|-------------|
+| `-p PATH`, `--path PATH` | Unix socket path (default: /tmp/netmon_socket) |
+| `-c CMD`, `--command CMD` | Command to execute on notification |
+
+## Output Files 📁
+
+- `network_devices.json`: Database of all discovered devices
+- `oui.csv`: MAC vendor database
+- `scans/`: Directory containing detailed scan results
+
+## Examples 📝
+
+### Monitoring for New Devices
+
+```bash
+# Start the notifier to receive alerts
+./notifier.py &
+
+# Run continuous monitoring with table display
+sudo ./netmon.py -T -N -i 60
+```
+
+### Running Weekly Intensive Scans
+
+Add to crontab:
+```
+0 2 * * 0 cd /path/to/netmon && sudo ./netmon.py -I > /var/log/netmon_scan.log 2>&1
+```
+
+## How It Works 🔧
+
+1. NetMon uses nmap to discover devices on your local network
+2. MAC addresses are looked up in the IEEE OUI database
+3. Device information is stored in a JSON database
+4. Connection status changes trigger notifications via Unix socket
+5. The notifier process displays desktop notifications
+
+## License 📄
+
+MIT
+
+## Contributing 🤝
+
+Contributions are welcome! Feel free to submit issues and pull requests.
+
+## Acknowledgements 🙏
+
+- Uses the IEEE MAC vendors database
+- Built with Python and Nmap

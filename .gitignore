@@ -1,25 +1,7 @@
-# Network Scanner sensitive data
-known_network_devices.json
-
-# Python cache files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Python virtual environments
-venv/
-env/
-.env/
-
-# Log files
-*.log
-
-# OS specific files
-.DS_Store
-Thumbs.db
-
-# IDE specific files
-.idea/
-.vscode/
-*.swp
-*.swo
+scans/20250503_202424/network
+os
+re
+socket
+subprocess
+sys
+network_devices.json
