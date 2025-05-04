@@ -1,0 +1,634 @@
+# Nmap 7.95 scan initiated Sat May  3 20:24:24 2025 as: nmap -sT --top-ports 300 -T4 -A -vv -oA ./scans/20250503_202424/network/network_scan 192.168.3.0/24
+Nmap scan report for 192.168.3.0 [host down, received no-response]
+Nmap scan report for 192.168.3.2 [host down, received no-response]
+Nmap scan report for 192.168.3.3 [host down, received no-response]
+Nmap scan report for 192.168.3.4 [host down, received no-response]
+Nmap scan report for 192.168.3.5 [host down, received no-response]
+Nmap scan report for 192.168.3.6 [host down, received no-response]
+Nmap scan report for 192.168.3.7 [host down, received no-response]
+Nmap scan report for 192.168.3.8 [host down, received no-response]
+Nmap scan report for 192.168.3.9 [host down, received no-response]
+Nmap scan report for 192.168.3.10 [host down, received no-response]
+Nmap scan report for 192.168.3.11 [host down, received no-response]
+Nmap scan report for 192.168.3.12 [host down, received no-response]
+Nmap scan report for 192.168.3.13 [host down, received no-response]
+Nmap scan report for 192.168.3.14 [host down, received no-response]
+Nmap scan report for 192.168.3.15 [host down, received no-response]
+Nmap scan report for 192.168.3.16 [host down, received no-response]
+Nmap scan report for 192.168.3.17 [host down, received no-response]
+Nmap scan report for 192.168.3.18 [host down, received no-response]
+Nmap scan report for 192.168.3.19 [host down, received no-response]
+Nmap scan report for 192.168.3.20 [host down, received no-response]
+Nmap scan report for 192.168.3.21 [host down, received no-response]
+Nmap scan report for 192.168.3.22 [host down, received no-response]
+Nmap scan report for 192.168.3.23 [host down, received no-response]
+Nmap scan report for 192.168.3.24 [host down, received no-response]
+Nmap scan report for 192.168.3.25 [host down, received no-response]
+Nmap scan report for 192.168.3.26 [host down, received no-response]
+Nmap scan report for 192.168.3.27 [host down, received no-response]
+Nmap scan report for 192.168.3.28 [host down, received no-response]
+Nmap scan report for 192.168.3.29 [host down, received no-response]
+Nmap scan report for 192.168.3.30 [host down, received no-response]
+Nmap scan report for 192.168.3.31 [host down, received no-response]
+Nmap scan report for 192.168.3.32 [host down, received no-response]
+Nmap scan report for 192.168.3.33 [host down, received no-response]
+Nmap scan report for 192.168.3.34 [host down, received no-response]
+Nmap scan report for 192.168.3.35 [host down, received no-response]
+Nmap scan report for 192.168.3.36 [host down, received no-response]
+Nmap scan report for 192.168.3.37 [host down, received no-response]
+Nmap scan report for 192.168.3.38 [host down, received no-response]
+Nmap scan report for 192.168.3.39 [host down, received no-response]
+Nmap scan report for 192.168.3.40 [host down, received no-response]
+Nmap scan report for 192.168.3.41 [host down, received no-response]
+Nmap scan report for 192.168.3.42 [host down, received no-response]
+Nmap scan report for 192.168.3.43 [host down, received no-response]
+Nmap scan report for 192.168.3.44 [host down, received no-response]
+Nmap scan report for 192.168.3.45 [host down, received no-response]
+Nmap scan report for 192.168.3.47 [host down, received no-response]
+Nmap scan report for 192.168.3.48 [host down, received no-response]
+Nmap scan report for 192.168.3.49 [host down, received no-response]
+Nmap scan report for 192.168.3.50 [host down, received no-response]
+Nmap scan report for 192.168.3.51 [host down, received no-response]
+Nmap scan report for 192.168.3.53 [host down, received no-response]
+Nmap scan report for 192.168.3.54 [host down, received no-response]
+Nmap scan report for 192.168.3.55 [host down, received no-response]
+Nmap scan report for 192.168.3.56 [host down, received no-response]
+Nmap scan report for 192.168.3.57 [host down, received no-response]
+Nmap scan report for 192.168.3.58 [host down, received no-response]
+Nmap scan report for 192.168.3.59 [host down, received no-response]
+Nmap scan report for 192.168.3.60 [host down, received no-response]
+Nmap scan report for 192.168.3.61 [host down, received no-response]
+Nmap scan report for 192.168.3.62 [host down, received no-response]
+Nmap scan report for 192.168.3.63 [host down, received no-response]
+Nmap scan report for 192.168.3.64 [host down, received no-response]
+Nmap scan report for 192.168.3.65 [host down, received no-response]
+Nmap scan report for 192.168.3.66 [host down, received no-response]
+Nmap scan report for 192.168.3.67 [host down, received no-response]
+Nmap scan report for 192.168.3.69 [host down, received no-response]
+Nmap scan report for 192.168.3.70 [host down, received no-response]
+Nmap scan report for 192.168.3.71 [host down, received no-response]
+Nmap scan report for 192.168.3.72 [host down, received no-response]
+Nmap scan report for 192.168.3.73 [host down, received no-response]
+Nmap scan report for 192.168.3.74 [host down, received no-response]
+Nmap scan report for 192.168.3.75 [host down, received no-response]
+Nmap scan report for 192.168.3.76 [host down, received no-response]
+Nmap scan report for 192.168.3.77 [host down, received no-response]
+Nmap scan report for 192.168.3.78 [host down, received no-response]
+Nmap scan report for 192.168.3.79 [host down, received no-response]
+Nmap scan report for 192.168.3.80 [host down, received no-response]
+Nmap scan report for 192.168.3.81 [host down, received no-response]
+Nmap scan report for 192.168.3.82 [host down, received no-response]
+Nmap scan report for 192.168.3.83 [host down, received no-response]
+Nmap scan report for 192.168.3.84 [host down, received no-response]
+Nmap scan report for 192.168.3.85 [host down, received no-response]
+Nmap scan report for 192.168.3.86 [host down, received no-response]
+Nmap scan report for 192.168.3.87 [host down, received no-response]
+Nmap scan report for 192.168.3.88 [host down, received no-response]
+Nmap scan report for 192.168.3.89 [host down, received no-response]
+Nmap scan report for 192.168.3.90 [host down, received no-response]
+Nmap scan report for 192.168.3.91 [host down, received no-response]
+Nmap scan report for 192.168.3.92 [host down, received no-response]
+Nmap scan report for 192.168.3.93 [host down, received no-response]
+Nmap scan report for 192.168.3.94 [host down, received no-response]
+Nmap scan report for 192.168.3.95 [host down, received no-response]
+Nmap scan report for 192.168.3.96 [host down, received no-response]
+Nmap scan report for 192.168.3.97 [host down, received no-response]
+Nmap scan report for 192.168.3.98 [host down, received no-response]
+Nmap scan report for 192.168.3.99 [host down, received no-response]
+Nmap scan report for 192.168.3.100 [host down, received no-response]
+Nmap scan report for 192.168.3.101 [host down, received no-response]
+Nmap scan report for 192.168.3.102 [host down, received no-response]
+Nmap scan report for 192.168.3.103 [host down, received no-response]
+Nmap scan report for 192.168.3.104 [host down, received no-response]
+Nmap scan report for 192.168.3.105 [host down, received no-response]
+Nmap scan report for 192.168.3.106 [host down, received no-response]
+Nmap scan report for 192.168.3.107 [host down, received no-response]
+Nmap scan report for 192.168.3.108 [host down, received no-response]
+Nmap scan report for 192.168.3.109 [host down, received no-response]
+Nmap scan report for 192.168.3.110 [host down, received no-response]
+Nmap scan report for 192.168.3.111 [host down, received no-response]
+Nmap scan report for 192.168.3.112 [host down, received no-response]
+Nmap scan report for 192.168.3.113 [host down, received no-response]
+Nmap scan report for 192.168.3.114 [host down, received no-response]
+Nmap scan report for 192.168.3.115 [host down, received no-response]
+Nmap scan report for 192.168.3.117 [host down, received no-response]
+Nmap scan report for 192.168.3.118 [host down, received no-response]
+Nmap scan report for 192.168.3.119 [host down, received no-response]
+Nmap scan report for 192.168.3.120 [host down, received no-response]
+Nmap scan report for 192.168.3.121 [host down, received no-response]
+Nmap scan report for 192.168.3.122 [host down, received no-response]
+Nmap scan report for 192.168.3.123 [host down, received no-response]
+Nmap scan report for 192.168.3.124 [host down, received no-response]
+Nmap scan report for 192.168.3.125 [host down, received no-response]
+Nmap scan report for 192.168.3.126 [host down, received no-response]
+Nmap scan report for 192.168.3.127 [host down, received no-response]
+Nmap scan report for 192.168.3.128 [host down, received no-response]
+Nmap scan report for 192.168.3.129 [host down, received no-response]
+Nmap scan report for 192.168.3.130 [host down, received no-response]
+Nmap scan report for 192.168.3.131 [host down, received no-response]
+Nmap scan report for 192.168.3.132 [host down, received no-response]
+Nmap scan report for 192.168.3.133 [host down, received no-response]
+Nmap scan report for 192.168.3.134 [host down, received no-response]
+Nmap scan report for 192.168.3.135 [host down, received no-response]
+Nmap scan report for 192.168.3.136 [host down, received no-response]
+Nmap scan report for 192.168.3.137 [host down, received no-response]
+Nmap scan report for 192.168.3.138 [host down, received no-response]
+Nmap scan report for 192.168.3.139 [host down, received no-response]
+Nmap scan report for 192.168.3.140 [host down, received no-response]
+Nmap scan report for 192.168.3.141 [host down, received no-response]
+Nmap scan report for 192.168.3.142 [host down, received no-response]
+Nmap scan report for 192.168.3.143 [host down, received no-response]
+Nmap scan report for 192.168.3.144 [host down, received no-response]
+Nmap scan report for 192.168.3.145 [host down, received no-response]
+Nmap scan report for 192.168.3.146 [host down, received no-response]
+Nmap scan report for 192.168.3.147 [host down, received no-response]
+Nmap scan report for 192.168.3.148 [host down, received no-response]
+Nmap scan report for 192.168.3.149 [host down, received no-response]
+Nmap scan report for 192.168.3.150 [host down, received no-response]
+Nmap scan report for 192.168.3.151 [host down, received no-response]
+Nmap scan report for 192.168.3.152 [host down, received no-response]
+Nmap scan report for 192.168.3.153 [host down, received no-response]
+Nmap scan report for 192.168.3.154 [host down, received no-response]
+Nmap scan report for 192.168.3.155 [host down, received no-response]
+Nmap scan report for 192.168.3.156 [host down, received no-response]
+Nmap scan report for 192.168.3.157 [host down, received no-response]
+Nmap scan report for 192.168.3.158 [host down, received no-response]
+Nmap scan report for 192.168.3.159 [host down, received no-response]
+Nmap scan report for 192.168.3.160 [host down, received no-response]
+Nmap scan report for 192.168.3.161 [host down, received no-response]
+Nmap scan report for 192.168.3.162 [host down, received no-response]
+Nmap scan report for 192.168.3.163 [host down, received no-response]
+Nmap scan report for 192.168.3.164 [host down, received no-response]
+Nmap scan report for 192.168.3.165 [host down, received no-response]
+Nmap scan report for 192.168.3.166 [host down, received no-response]
+Nmap scan report for 192.168.3.167 [host down, received no-response]
+Nmap scan report for 192.168.3.168 [host down, received no-response]
+Nmap scan report for 192.168.3.169 [host down, received no-response]
+Nmap scan report for 192.168.3.170 [host down, received no-response]
+Nmap scan report for 192.168.3.171 [host down, received no-response]
+Nmap scan report for 192.168.3.172 [host down, received no-response]
+Nmap scan report for 192.168.3.173 [host down, received no-response]
+Nmap scan report for 192.168.3.174 [host down, received no-response]
+Nmap scan report for 192.168.3.175 [host down, received no-response]
+Nmap scan report for 192.168.3.176 [host down, received no-response]
+Nmap scan report for 192.168.3.177 [host down, received no-response]
+Nmap scan report for 192.168.3.178 [host down, received no-response]
+Nmap scan report for 192.168.3.179 [host down, received no-response]
+Nmap scan report for 192.168.3.180 [host down, received no-response]
+Nmap scan report for 192.168.3.181 [host down, received no-response]
+Nmap scan report for 192.168.3.182 [host down, received no-response]
+Nmap scan report for 192.168.3.183 [host down, received no-response]
+Nmap scan report for 192.168.3.184 [host down, received no-response]
+Nmap scan report for 192.168.3.185 [host down, received no-response]
+Nmap scan report for 192.168.3.186 [host down, received no-response]
+Nmap scan report for 192.168.3.187 [host down, received no-response]
+Nmap scan report for 192.168.3.188 [host down, received no-response]
+Nmap scan report for 192.168.3.189 [host down, received no-response]
+Nmap scan report for 192.168.3.190 [host down, received no-response]
+Nmap scan report for 192.168.3.191 [host down, received no-response]
+Nmap scan report for 192.168.3.192 [host down, received no-response]
+Nmap scan report for 192.168.3.193 [host down, received no-response]
+Nmap scan report for 192.168.3.194 [host down, received no-response]
+Nmap scan report for 192.168.3.195 [host down, received no-response]
+Nmap scan report for 192.168.3.196 [host down, received no-response]
+Nmap scan report for 192.168.3.197 [host down, received no-response]
+Nmap scan report for 192.168.3.198 [host down, received no-response]
+Nmap scan report for 192.168.3.199 [host down, received no-response]
+Nmap scan report for 192.168.3.200 [host down, received no-response]
+Nmap scan report for 192.168.3.202 [host down, received no-response]
+Nmap scan report for 192.168.3.203 [host down, received no-response]
+Nmap scan report for 192.168.3.204 [host down, received no-response]
+Nmap scan report for 192.168.3.205 [host down, received no-response]
+Nmap scan report for 192.168.3.206 [host down, received no-response]
+Nmap scan report for 192.168.3.207 [host down, received no-response]
+Nmap scan report for 192.168.3.208 [host down, received no-response]
+Nmap scan report for 192.168.3.209 [host down, received no-response]
+Nmap scan report for 192.168.3.210 [host down, received no-response]
+Nmap scan report for 192.168.3.211 [host down, received no-response]
+Nmap scan report for 192.168.3.212 [host down, received no-response]
+Nmap scan report for 192.168.3.213 [host down, received no-response]
+Nmap scan report for 192.168.3.214 [host down, received no-response]
+Nmap scan report for 192.168.3.215 [host down, received no-response]
+Nmap scan report for 192.168.3.216 [host down, received no-response]
+Nmap scan report for 192.168.3.217 [host down, received no-response]
+Nmap scan report for 192.168.3.218 [host down, received no-response]
+Nmap scan report for 192.168.3.219 [host down, received no-response]
+Nmap scan report for 192.168.3.220 [host down, received no-response]
+Nmap scan report for 192.168.3.221 [host down, received no-response]
+Nmap scan report for 192.168.3.222 [host down, received no-response]
+Nmap scan report for 192.168.3.223 [host down, received no-response]
+Nmap scan report for 192.168.3.224 [host down, received no-response]
+Nmap scan report for 192.168.3.225 [host down, received no-response]
+Nmap scan report for 192.168.3.226 [host down, received no-response]
+Nmap scan report for 192.168.3.227 [host down, received no-response]
+Nmap scan report for 192.168.3.228 [host down, received no-response]
+Nmap scan report for 192.168.3.229 [host down, received no-response]
+Nmap scan report for 192.168.3.230 [host down, received no-response]
+Nmap scan report for 192.168.3.231 [host down, received no-response]
+Nmap scan report for 192.168.3.232 [host down, received no-response]
+Nmap scan report for 192.168.3.233 [host down, received no-response]
+Nmap scan report for 192.168.3.234 [host down, received no-response]
+Nmap scan report for 192.168.3.236 [host down, received no-response]
+Nmap scan report for 192.168.3.237 [host down, received no-response]
+Nmap scan report for 192.168.3.238 [host down, received no-response]
+Nmap scan report for 192.168.3.239 [host down, received no-response]
+Nmap scan report for 192.168.3.240 [host down, received no-response]
+Nmap scan report for 192.168.3.241 [host down, received no-response]
+Nmap scan report for 192.168.3.242 [host down, received no-response]
+Nmap scan report for 192.168.3.243 [host down, received no-response]
+Nmap scan report for 192.168.3.244 [host down, received no-response]
+Nmap scan report for 192.168.3.245 [host down, received no-response]
+Nmap scan report for 192.168.3.246 [host down, received no-response]
+Nmap scan report for 192.168.3.247 [host down, received no-response]
+Nmap scan report for 192.168.3.248 [host down, received no-response]
+Nmap scan report for 192.168.3.249 [host down, received no-response]
+Nmap scan report for 192.168.3.250 [host down, received no-response]
+Nmap scan report for 192.168.3.251 [host down, received no-response]
+Nmap scan report for 192.168.3.252 [host down, received no-response]
+Nmap scan report for 192.168.3.253 [host down, received no-response]
+Nmap scan report for 192.168.3.255 [host down, received no-response]
+Nmap scan report for 192.168.3.1
+Host is up, received arp-response (0.041s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+Not shown: 297 filtered tcp ports (no-response)
+PORT    STATE SERVICE    REASON  VERSION
+53/tcp  open  tcpwrapped syn-ack
+80/tcp  open  http       syn-ack Huawei router http admin
+| http-methods: 
+|_  Supported Methods: GET POST
+|_http-favicon: Unknown favicon MD5: C783A51F2462103896EA1697FC0777CB
+|_http-title: Success
+443/tcp open  ssl/http   syn-ack Huawei router http admin
+|_ssl-date: TLS randomness does not represent time
+| ssl-cert: Subject: commonName=mediarouter.home/organizationName=Huawei Technologies Co., Ltd/stateOrProvinceName=Hubei/countryName=CN/organizationalUnitName=MBB&HOME/localityName=Wuhan
+| Issuer: commonName=link.home/stateOrProvinceName=Hubei/countryName=CN/localityName=Wuhan/emailAddress=mobile@huawei.com
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2019-04-19T03:33:29
+| Not valid after:  2044-04-12T03:33:29
+| MD5:   a589:28fa:e5ba:c118:52b5:8592:e1cf:61fe
+| SHA-1: 36ed:7c15:a902:8b25:db42:6055:fbdd:8950:5df2:6aae
+| -----BEGIN CERTIFICATE-----
+| MIIDvDCCAqSgAwIBAgICASkwDQYJKoZIhvcNAQELBQAwYzELMAkGA1UEBhMCQ04x
+| DjAMBgNVBAgMBUh1YmVpMQ4wDAYDVQQHDAVXdWhhbjESMBAGA1UEAwwJbGluay5o
+| b21lMSAwHgYJKoZIhvcNAQkBFhFtb2JpbGVAaHVhd2VpLmNvbTAeFw0xOTA0MTkw
+| MzMzMjlaFw00NDA0MTIwMzMzMjlaMIGCMQswCQYDVQQGEwJDTjEOMAwGA1UECAwF
+| SHViZWkxDjAMBgNVBAcMBVd1aGFuMSUwIwYDVQQKDBxIdWF3ZWkgVGVjaG5vbG9n
+| aWVzIENvLiwgTHRkMREwDwYDVQQLDAhNQkImSE9NRTEZMBcGA1UEAwwQbWVkaWFy
+| b3V0ZXIuaG9tZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK1zqLHr
+| VTzaInIwpZ8OguFKsWWgomEZIEOc8RSDAnD4k/LLt8wPv84daoVFDiEE2EeeQETZ
+| Y5T6EQXJf9df3O7qKpzLcD6jyGvFmHXjq0X8PtEKVm4J8xvc0AQ5ttl4to2RG9tC
+| EHdYl6UKJBzGitDpa0apORfzGTm4imi8xaG7kgHbYIx0llcn1ZJ0XJ59SjjGnXEr
+| bsJgPhckHfEbXuv7CDF8NM8htwSsA5ye8pM9lPg/GNERBtaDGkZNbgnSeDZal6S1
+| YVmpgI070/H06uG/wPc82yGMbrPndMll0lRIwhwWaUb65rJtDnHDM+VT6ZJJbLWX
+| CyAmFVDjZMFOivcCAwEAAaNaMFgwHQYDVR0OBBYEFPSXLQWp01Nc8PIrfDDh1YCH
+| flhrMB8GA1UdIwQYMBaAFJ58J24X7QKKduLpSXY5a++sxgZaMAkGA1UdEwQCMAAw
+| CwYDVR0PBAQDAgXgMA0GCSqGSIb3DQEBCwUAA4IBAQB1jMPjW0XXgjDZlhrAPoPU
+| DnC/V2brsKmm5a7cOTqWnk+JaSWoFLLGvAKArqdkgjNRYB5Pl7Eeqho69WmbnT/T
+| jvn4owkF7OoMdPOsC4LHZj/y4q6Ab6v2hKmK/E8Oj9QgA0FF1zkJWkUBSfUnrf1Y
+| zF87MyyzeSolSlXRZcSXXg7kLH7iNIEq7CT2Ulrg4mWknxWamhtr7RH7vvyxPn9o
+| LeFuUyfzPA0nyagYN0ocadOhqtP+ykislyMyVm9sG/HSwlc95nQmMiuaE/D6IDsv
+| eZboH8YoEmEXPDAhDUkaW1IsEJrqURg4S1oBFmhL7QW/G4+bKYQQvxQkXt2yY01G
+|_-----END CERTIFICATE-----
+| http-methods: 
+|_  Supported Methods: GET POST
+|_http-title: Success
+MAC Address: 78:C5:F8:98:DE:13 (Huawei Device)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: WAP|broadband router|switch|media device|storage-misc|general purpose|printer|load balancer
+Running (JUST GUESSING): Linux 3.X|2.6.X (95%), Netgear embedded (91%), Western Digital embedded (91%), Xerox embedded (90%)
+OS CPE: cpe:/o:linux:linux_kernel:3.10 cpe:/o:linux:linux_kernel:3.3 cpe:/o:linux:linux_kernel:3.18.24 cpe:/o:linux:linux_kernel cpe:/o:linux:linux_kernel:2.6.32
+OS fingerprint not ideal because: Missing a closed TCP port so results incomplete
+Aggressive OS guesses: DD-WRT v24-sp2 (Linux 3.10) (95%), OpenWrt (Linux 3.3) (91%), Netgear GS108Tv3, GS110Tv3, or GS308T switch (Linux 3.18.24) (91%), Dahua or Amcrest network video recorder (Linux) (91%), Western Digital My Cloud DL4100 NAS (Linux 3.10) (91%), Linux 2.6.32 (90%), Xerox printer or Kemp LoadMaster Firmware 7.1 (Linux 3.10) (90%), Geovision EBD4700 CCTV camera (Linux 3.4) (89%), Linux 2.6.32 - 3.10 (89%), ProVision-ISR security DVR (89%)
+No exact OS matches for host (test conditions non-ideal).
+TCP/IP fingerprint:
+SCAN(V=7.95%E=4%D=5/3%OT=80%CT=%CU=%PV=Y%DS=1%DC=D%G=N%M=78C5F8%TM=6816A5D0%P=x86_64-pc-linux-gnu)
+SEQ(SP=106%GCD=1%ISR=10E%TI=Z%II=I%TS=U)
+SEQ(SP=109%GCD=1%ISR=108%TI=Z%II=I%TS=U)
+OPS(O1=M5B4NNSNW4%O2=M5B4NNSNW4%O3=M5B4NW4%O4=M5B4NNSNW4%O5=M5B4NNSNW4%O6=M5B4NNS)
+WIN(W1=3908%W2=3908%W3=3908%W4=3908%W5=3908%W6=3908)
+ECN(R=Y%DF=Y%TG=40%W=3908%O=M5B4NNSNW4%CC=Y%Q=)
+T1(R=Y%DF=Y%TG=40%S=O%A=S+%F=AS%RD=0%Q=)
+T2(R=N)
+T3(R=N)
+T4(R=Y%DF=Y%TG=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)
+U1(R=N)
+IE(R=Y%DFI=N%TG=40%CD=S)
+
+Network Distance: 1 hop
+TCP Sequence Prediction: Difficulty=265 (Good luck!)
+IP ID Sequence Generation: All zeros
+Service Info: Device: router
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   41.05 ms 192.168.3.1
+
+Nmap scan report for 192.168.3.46
+Host is up, received arp-response (0.054s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+Not shown: 245 closed tcp ports (conn-refused)
+PORT      STATE    SERVICE          REASON      VERSION
+1/tcp     filtered tcpmux           no-response
+7/tcp     filtered echo             no-response
+20/tcp    filtered ftp-data         no-response
+24/tcp    filtered priv-mail        no-response
+26/tcp    filtered rsftp            no-response
+42/tcp    filtered nameserver       no-response
+144/tcp   filtered news             no-response
+179/tcp   filtered bgp              no-response
+311/tcp   filtered asip-webadmin    no-response
+465/tcp   filtered smtps            no-response
+497/tcp   filtered retrospect       no-response
+512/tcp   filtered exec             no-response
+514/tcp   filtered shell            no-response
+543/tcp   filtered klogin           no-response
+1000/tcp  filtered cadlock          no-response
+1027/tcp  filtered IIS              no-response
+1029/tcp  filtered ms-lsa           no-response
+1034/tcp  filtered zincite-a        no-response
+1058/tcp  filtered nim              no-response
+1059/tcp  filtered nimreg           no-response
+1062/tcp  filtered veracity         no-response
+1433/tcp  filtered ms-sql-s         no-response
+1801/tcp  filtered msmq             no-response
+1998/tcp  filtered x25-svc-port     no-response
+2001/tcp  filtered dc               no-response
+2004/tcp  filtered mailbox          no-response
+2005/tcp  filtered deslogin         no-response
+2010/tcp  filtered search           no-response
+2601/tcp  filtered zebra            no-response
+2967/tcp  filtered symantec-av      no-response
+3269/tcp  filtered globalcatLDAPssl no-response
+3283/tcp  filtered netassistant     no-response
+3333/tcp  filtered dec-notes        no-response
+4000/tcp  filtered remoteanything   no-response
+4045/tcp  filtered lockd            no-response
+4899/tcp  filtered radmin           no-response
+5101/tcp  filtered admdog           no-response
+5190/tcp  filtered aol              no-response
+5225/tcp  filtered hp-server        no-response
+5555/tcp  filtered freeciv          no-response
+6543/tcp  filtered mythtv           no-response
+7100/tcp  filtered font-service     no-response
+8008/tcp  filtered http             no-response
+8010/tcp  filtered xmpp             no-response
+8031/tcp  filtered unknown          no-response
+8192/tcp  filtered sophos           no-response
+8194/tcp  filtered sophos           no-response
+9593/tcp  filtered cba8             no-response
+9595/tcp  filtered pds              no-response
+15000/tcp filtered hydap            no-response
+32768/tcp filtered filenet-tms      no-response
+32772/tcp filtered sometimes-rpc7   no-response
+35500/tcp filtered unknown          no-response
+49157/tcp filtered unknown          no-response
+64623/tcp filtered unknown          no-response
+MAC Address: 8A:43:24:21:41:23 (Unknown)
+Too many fingerprints match this host to give specific OS details
+TCP/IP fingerprint:
+SCAN(V=7.95%E=4%D=5/3%OT=%CT=3%CU=41627%PV=Y%DS=1%DC=D%G=N%M=8A4324%TM=6816A5D0%P=x86_64-pc-linux-gnu)
+SEQ(CI=Z%II=I)
+T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)
+T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)
+IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   54.34 ms 192.168.3.46
+
+Nmap scan report for 192.168.3.52
+Host is up, received arp-response (0.054s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+All 300 scanned ports on 192.168.3.52 are in ignored states.
+Not shown: 300 closed tcp ports (conn-refused)
+MAC Address: F8:FF:C2:89:05:BE (Apple)
+Too many fingerprints match this host to give specific OS details
+TCP/IP fingerprint:
+SCAN(V=7.95%E=4%D=5/3%OT=%CT=1%CU=36365%PV=Y%DS=1%DC=D%G=N%M=F8FFC2%TM=6816A5D0%P=x86_64-pc-linux-gnu)
+SEQ(CI=RD%II=RI)
+T5(R=Y%DF=N%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)
+T7(R=Y%DF=N%T=40%W=0%S=Z%A=S%F=AR%O=%RD=0%Q=)
+U1(R=Y%DF=N%T=40%IPL=38%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=0%RUD=G)
+IE(R=Y%DFI=S%T=40%CD=S)
+
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   54.20 ms 192.168.3.52
+
+Nmap scan report for 192.168.3.68
+Host is up, received arp-response (0.055s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+All 300 scanned ports on 192.168.3.68 are in ignored states.
+Not shown: 300 closed tcp ports (conn-refused)
+MAC Address: EE:67:20:78:66:37 (Unknown)
+Too many fingerprints match this host to give specific OS details
+TCP/IP fingerprint:
+SCAN(V=7.95%E=4%D=5/3%OT=%CT=1%CU=41826%PV=Y%DS=1%DC=D%G=N%M=EE6720%TM=6816A5D0%P=x86_64-pc-linux-gnu)
+SEQ(CI=Z%II=I)
+T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)
+T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)
+IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   55.29 ms 192.168.3.68
+
+Nmap scan report for 192.168.3.235
+Host is up, received arp-response (0.040s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+Not shown: 298 closed tcp ports (conn-refused)
+PORT    STATE SERVICE REASON  VERSION
+80/tcp  open  http    syn-ack
+|_http-title: NETSurveillance WEB
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+| fingerprint-strings: 
+|   GetRequest, HTTPOptions: 
+|     HTTP/1.0 200 OK
+|     Content-type: text/html
+|     Expires: 0
+|     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+|     <html xmlns="http://www.w3.org/1999/xhtml">
+|     <head>
+|     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+|     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+|     <link rel="stylesheet" type="text/css" media="screen" href="m.css" />
+|     <title>NETSurveillance WEB</title>
+|     <!-- m.js -->
+|     <script type="text/javascript" language="JavaScript">
+|     bCrossBrow=false;
+|     bnpCheck = false;
+|     showemailflag=3;
+|     ShowTipFlag=1;
+|     //wzy 20190904
+|     g_initWidth = document.documentElement.clientWidth;
+|     SupportFind=false;
+|     if(navigator.platform != "Win32")//
+|     userAgent = navigator.userAgent, 
+|_    rMsie = /(msies|trident.
+554/tcp open  rtsp    syn-ack H264DVR rtspd 1.0
+|_rtsp-methods: OPTIONS, DESCRIBE, SETUP, TEARDOWN, GET_PARAMETER, SET_PARAMETER, PLAY, PAUSE
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port80-TCP:V=7.95%I=7%D=5/3%Time=6816A5B3%P=x86_64-pc-linux-gnu%r(GetRe
+SF:quest,1130,"HTTP/1\.0\x20200\x20OK\r\nContent-type:\x20text/html\r\nExp
+SF:ires:\x200\r\n\r\n<!DOCTYPE\x20html\x20PUBLIC\x20\"-//W3C//DTD\x20XHTML
+SF:\x201\.0\x20Transitional//EN\"\x20\"http://www\.w3\.org/TR/xhtml1/DTD/x
+SF:html1-transitional\.dtd\">\r\n<html\x20xmlns=\"http://www\.w3\.org/1999
+SF:/xhtml\">\r\n<head>\r\n\x20\x20\x20\x20<meta\x20http-equiv=\"Content-Ty
+SF:pe\"\x20content=\"text/html;\x20charset=UTF-8\"\x20/>\r\n\t<meta\x20htt
+SF:p-equiv=\"X-UA-Compatible\"\x20content=\"IE=edge\"/>\r\n\x20\x20\x20\x2
+SF:0<link\x20rel=\"stylesheet\"\x20type=\"text/css\"\x20media=\"screen\"\x
+SF:20href=\"m\.css\"\x20/>\r\n\x20\x20\x20\x20\r\n\x20\x20\x20\x20<title>N
+SF:ETSurveillance\x20WEB</title>\r\n\x20\x20\x20\x20\r\n\x20\x20\x20\x20<!
+SF:--\x20m\.js\x20-->\r\n\r\n\x20\x20\x20\x20<script\x20type=\"text/javasc
+SF:ript\"\x20language=\"JavaScript\">\r\n\x20\x20\x20\x20\x20var\x20bCross
+SF:Brow=false;\r\n\t\x20var\x20bnpCheck\x20=\x20false;\r\nvar\x20showemail
+SF:flag=3;\r\nvar\x20ShowTipFlag=1;\r\n\t\x20//wzy\x2020190904\r\n\x20\x20
+SF:\x20\x20\x20var\x20g_initWidth\x20=\x20document\.documentElement\.clien
+SF:tWidth;\r\n\t\r\n\t//\x20var\x20SupportFind=false;\r\n\t\x20\x20\x20\x2
+SF:0\r\n\tif\(navigator\.platform\x20!=\x20\"Win32\"\)//\r\n\t{\r\n\t}\r\n
+SF:\tvar\x20userAgent\x20=\x20navigator\.userAgent,\x20\x20\x20\r\n\t\t\tr
+SF:Msie\x20=\x20/\(msie\\s\|trident\.")%r(HTTPOptions,32F9,"HTTP/1\.0\x202
+SF:00\x20OK\r\nContent-type:\x20text/html\r\nExpires:\x200\r\n\r\n<!DOCTYP
+SF:E\x20html\x20PUBLIC\x20\"-//W3C//DTD\x20XHTML\x201\.0\x20Transitional//
+SF:EN\"\x20\"http://www\.w3\.org/TR/xhtml1/DTD/xhtml1-transitional\.dtd\">
+SF:\r\n<html\x20xmlns=\"http://www\.w3\.org/1999/xhtml\">\r\n<head>\r\n\x2
+SF:0\x20\x20\x20<meta\x20http-equiv=\"Content-Type\"\x20content=\"text/htm
+SF:l;\x20charset=UTF-8\"\x20/>\r\n\t<meta\x20http-equiv=\"X-UA-Compatible\
+SF:"\x20content=\"IE=edge\"/>\r\n\x20\x20\x20\x20<link\x20rel=\"stylesheet
+SF:\"\x20type=\"text/css\"\x20media=\"screen\"\x20href=\"m\.css\"\x20/>\r\
+SF:n\x20\x20\x20\x20\r\n\x20\x20\x20\x20<title>NETSurveillance\x20WEB</tit
+SF:le>\r\n\x20\x20\x20\x20\r\n\x20\x20\x20\x20<!--\x20m\.js\x20-->\r\n\r\n
+SF:\x20\x20\x20\x20<script\x20type=\"text/javascript\"\x20language=\"JavaS
+SF:cript\">\r\n\x20\x20\x20\x20\x20var\x20bCrossBrow=false;\r\n\t\x20var\x
+SF:20bnpCheck\x20=\x20false;\r\nvar\x20showemailflag=3;\r\nvar\x20ShowTipF
+SF:lag=1;\r\n\t\x20//wzy\x2020190904\r\n\x20\x20\x20\x20\x20var\x20g_initW
+SF:idth\x20=\x20document\.documentElement\.clientWidth;\r\n\t\r\n\t//\x20v
+SF:ar\x20SupportFind=false;\r\n\t\x20\x20\x20\x20\r\n\tif\(navigator\.plat
+SF:form\x20!=\x20\"Win32\"\)//\r\n\t{\r\n\t}\r\n\tvar\x20userAgent\x20=\x2
+SF:0navigator\.userAgent,\x20\x20\x20\r\n\t\t\trMsie\x20=\x20/\(msie\\s\|t
+SF:rident\.");
+MAC Address: B4:FB:E3:D6:DE:9D (AltoBeam (China))
+Device type: general purpose
+Running: Linux 3.X
+OS CPE: cpe:/o:linux:linux_kernel:3.0
+OS details: Linux 3.0, Linux 3.2 - 3.16
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=5/3%OT=80%CT=1%CU=38694%PV=Y%DS=1%DC=D%G=Y%M=B4FBE3%TM
+OS:=6816A5D0%P=x86_64-pc-linux-gnu)SEQ(SP=FF%GCD=1%ISR=110%TI=Z%CI=I%II=I%T
+OS:S=7)OPS(O1=M5B4ST11NW3%O2=M5B4ST11NW3%O3=M5B4NNT11NW3%O4=M5B4ST11NW3%O5=
+OS:M5B4ST11NW3%O6=M5B4ST11)WIN(W1=3890%W2=3890%W3=3890%W4=3890%W5=3890%W6=3
+OS:890)ECN(R=Y%DF=Y%T=40%W=3908%O=M5B4NNSNW3%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A
+OS:=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%
+OS:Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=
+OS:A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=
+OS:Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%
+OS:T=40%CD=S)
+
+Uptime guess: 1.256 days (since Fri May  2 14:16:20 2025)
+Network Distance: 1 hop
+TCP Sequence Prediction: Difficulty=255 (Good luck!)
+IP ID Sequence Generation: All zeros
+Service Info: Device: storage-misc
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   40.38 ms 192.168.3.235
+
+Nmap scan report for 192.168.3.254
+Host is up, received arp-response (0.036s latency).
+Scanned at 2025-05-03 20:24:28 -03 for 36s
+Not shown: 299 closed tcp ports (conn-refused)
+PORT     STATE    SERVICE REASON      VERSION
+5060/tcp filtered sip     no-response
+MAC Address: 06:A3:BE:29:63:E6 (Unknown)
+Too many fingerprints match this host to give specific OS details
+TCP/IP fingerprint:
+SCAN(V=7.95%E=4%D=5/3%OT=%CT=1%CU=32367%PV=Y%DS=1%DC=D%G=N%M=06A3BE%TM=6816A5D0%P=x86_64-pc-linux-gnu)
+SEQ(CI=Z)
+T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)
+T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)
+U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)
+IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT      ADDRESS
+1   36.04 ms 192.168.3.254
+
+adjust_timeouts2: packet supposedly had rtt of -106152 microseconds.  Ignoring time.
+adjust_timeouts2: packet supposedly had rtt of -106152 microseconds.  Ignoring time.
+adjust_timeouts2: packet supposedly had rtt of -156850 microseconds.  Ignoring time.
+adjust_timeouts2: packet supposedly had rtt of -156850 microseconds.  Ignoring time.
+Nmap scan report for 192.168.3.116
+Host is up, received localhost-response (0.020s latency).
+Scanned at 2025-05-03 20:25:04 -03 for 3s
+Not shown: 299 closed tcp ports (conn-refused)
+PORT   STATE SERVICE REASON  VERSION
+22/tcp open  ssh     syn-ack OpenSSH 10.0 (protocol 2.0)
+Device type: general purpose
+Running: Linux 2.6.X|5.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6.32 cpe:/o:linux:linux_kernel:5 cpe:/o:linux:linux_kernel:6
+OS details: Linux 2.6.32, Linux 5.0 - 6.2
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=5/3%OT=22%CT=1%CU=40225%PV=Y%DS=0%DC=L%G=Y%TM=6816A5D3
+OS:%P=x86_64-pc-linux-gnu)SEQ(SP=100%GCD=1%ISR=10D%TI=Z%CI=Z%TS=A)OPS(O1=MF
+OS:FD7ST11NW7%O2=MFFD7ST11NW7%O3=MFFD7NNT11NW7%O4=MFFD7ST11NW7%O5=MFFD7ST11
+OS:NW7%O6=MFFD7ST11)WIN(W1=FFCB%W2=FFCB%W3=FFCB%W4=FFCB%W5=FFCB%W6=FFCB)ECN
+OS:(R=Y%DF=Y%T=40%W=FFD7%O=MFFD7NNSNW7%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=
+OS:AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(
+OS:R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%
+OS:F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N
+OS:%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%C
+OS:D=S)
+
+Uptime guess: 28.232 days (since Sat Apr  5 14:51:15 2025)
+Network Distance: 0 hops
+TCP Sequence Prediction: Difficulty=256 (Good luck!)
+IP ID Sequence Generation: All zeros
+
+Nmap scan report for 192.168.3.201
+Host is up, received localhost-response (0.018s latency).
+Scanned at 2025-05-03 20:25:04 -03 for 3s
+Not shown: 299 closed tcp ports (conn-refused)
+PORT   STATE SERVICE REASON  VERSION
+22/tcp open  ssh     syn-ack OpenSSH 10.0 (protocol 2.0)
+Device type: general purpose
+Running: Linux 2.6.X|5.X
+OS CPE: cpe:/o:linux:linux_kernel:2.6.32 cpe:/o:linux:linux_kernel:5 cpe:/o:linux:linux_kernel:6
+OS details: Linux 2.6.32, Linux 5.0 - 6.2
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=5/3%OT=22%CT=1%CU=43636%PV=Y%DS=0%DC=L%G=Y%TM=6816A5D3
+OS:%P=x86_64-pc-linux-gnu)SEQ(SP=103%GCD=1%ISR=107%TI=Z%CI=Z%TS=A)OPS(O1=MF
+OS:FD7ST11NW7%O2=MFFD7ST11NW7%O3=MFFD7NNT11NW7%O4=MFFD7ST11NW7%O5=MFFD7ST11
+OS:NW7%O6=MFFD7ST11)WIN(W1=FFCB%W2=FFCB%W3=FFCB%W4=FFCB%W5=FFCB%W6=FFCB)ECN
+OS:(R=Y%DF=Y%T=40%W=FFD7%O=MFFD7NNSNW7%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=
+OS:AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(
+OS:R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%
+OS:F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N
+OS:%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%C
+OS:D=S)
+
+Uptime guess: 9.859 days (since Wed Apr 23 23:47:50 2025)
+Network Distance: 0 hops
+TCP Sequence Prediction: Difficulty=259 (Good luck!)
+IP ID Sequence Generation: All zeros
+
+Read data files from: /usr/bin/../share/nmap
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sat May  3 20:25:07 2025 -- 256 IP addresses (8 hosts up) scanned in 43.08 seconds

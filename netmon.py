@@ -1,607 +1,734 @@
 #!/usr/bin/env python3
 # filepath: /home/gabriwar/scripts/netmon/netmon.py
 
-import argparse
-import json
-import os
+import subprocess
 import re
 import socket
-import subprocess
+import os
 import sys
+import argparse
+import json
+from urllib.request import urlopen
+from datetime import datetime
 import time
-import threading
-import shutil
-from datetime import datetime, timedelta
+import csv
 import requests
-import ipaddress
-import signal
+from collections import defaultdict
 
-# Constants
-VERSION = "1.0.0"
-DEFAULT_SOCKET_PATH = '/tmp/netmon_socket'
-DEVICE_DB_FILE = 'network_devices.json'
-OUI_FILE = 'oui.csv'
-SCAN_DIR = 'scans'
+# Global debug flag
+DEBUG = False
 
-class NetworkMonitor:
-    def __init__(self, args):
-        """Initialize the network monitor with command line arguments"""
-        self.debug = args.debug
-        self.interval = args.interval
-        self.table_mode = args.table
-        self.clear_screen = args.clear
-        self.notify = args.notify
-        self.socket_path = args.socket
-        self.rescan_hosts = args.rescan_hosts
-        self.intensive_scan = args.intensive_scan
-        self.update_vendors_only = args.update_vendors_only
-        
-        # Ensure scan directory exists
-        if not os.path.exists(SCAN_DIR):
-            os.makedirs(SCAN_DIR)
-        
-        # Load device database
-        self.devices = self.load_devices()
-        
-        # Get network interface and IP information
-        self.network_info = self.get_network_info()
-        
-        # Check for root privileges
-        if os.geteuid() != 0 and not self.update_vendors_only:
-            print("⚠️  Warning: NetMon requires root privileges for full functionality.")
-            print("    Some features may not work correctly when run without sudo.")
-            
-        # Load or update OUI database if necessary
-        if not os.path.exists(OUI_FILE) or self.update_vendors_only:
-            self.update_oui_database()
-            if self.update_vendors_only:
-                sys.exit(0)
+# JSON file to store network scan results
+SCAN_RESULTS_FILE = "network_devices.json"
+
+def debug_print(message):
+    """Print message only if debug mode is enabled"""
+    if DEBUG:
+        print(message)
+
+# MAC address vendor database
+MAC_VENDORS_URL = "https://standards-oui.ieee.org/oui/oui.csv"
+MAC_VENDORS_FILE = "oui.csv"
+MAC_VENDORS = {}
+
+def load_mac_vendors():
+    """Load MAC address vendor database"""
+    global MAC_VENDORS
     
-    def log(self, message, level="INFO"):
-        """Log messages with timestamp"""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        if level == "DEBUG" and not self.debug:
+    debug_print("Loading MAC vendor database...")
+    
+    # Check if we have a local copy of the MAC vendors file
+    if os.path.exists(MAC_VENDORS_FILE):
+        try:
+            debug_print(f"Loading MAC vendors from local file: {MAC_VENDORS_FILE}")
+            with open(MAC_VENDORS_FILE, 'r', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                count = 0
+                for row in reader:
+                    if len(row) >= 2:
+                        mac_prefix = row[1].strip().replace('-', '').upper()
+                        vendor = row[2].strip()
+                        MAC_VENDORS[mac_prefix] = vendor
+                        count += 1
+            debug_print(f"Loaded {count} MAC vendor entries from local file")
             return
-        
-        level_prefix = {
-            "INFO": "ℹ️",
-            "DEBUG": "🔍",
-            "WARNING": "⚠️",
-            "ERROR": "❌",
-            "SUCCESS": "✅"
-        }.get(level, "")
-        
-        print(f"[{timestamp}] {level_prefix} {message}")
+        except Exception as e:
+            debug_print(f"Error loading MAC vendors from local file: {e}")
+            debug_print("Attempting to download MAC vendor database...")
     
-    def load_devices(self):
-        """Load device information from JSON file"""
-        if os.path.exists(DEVICE_DB_FILE):
-            try:
-                with open(DEVICE_DB_FILE, 'r') as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, PermissionError) as e:
-                self.log(f"Error loading device database: {e}", "ERROR")
-                return {}
-        else:
-            return {}
-    
-    def save_devices(self):
-        """Save device information to JSON file"""
-        try:
-            with open(DEVICE_DB_FILE, 'w') as f:
-                json.dump(self.devices, f, indent=2)
-        except PermissionError as e:
-            self.log(f"Error saving device database: {e}", "ERROR")
-    
-    def get_network_info(self):
-        """Get network interface and IP information"""
-        try:
-            # Get default route interface
-            route_cmd = subprocess.run(['ip', 'route', 'show', 'default'], 
-                                       capture_output=True, text=True)
-            interface_match = re.search(r'dev\s+(\w+)', route_cmd.stdout)
-            
-            if not interface_match:
-                self.log("Could not determine default network interface", "ERROR")
-                return None
-            
-            interface = interface_match.group(1)
-            
-            # Get IP address and network CIDR
-            ip_cmd = subprocess.run(['ip', '-f', 'inet', 'addr', 'show', interface], 
-                                   capture_output=True, text=True)
-            ip_match = re.search(r'inet\s+([0-9.]+)/(\d+)', ip_cmd.stdout)
-            
-            if not ip_match:
-                self.log(f"Could not determine IP address for interface {interface}", "ERROR")
-                return None
-            
-            ip_address = ip_match.group(1)
-            cidr = ip_match.group(2)
-            network = str(ipaddress.IPv4Network(f"{ip_address}/{cidr}", strict=False))
-            
-            self.log(f"Network information: Interface={interface}, IP={ip_address}, Network={network}", "DEBUG")
-            
-            return {
-                "interface": interface,
-                "ip_address": ip_address,
-                "network": network
-            }
-            
-        except (subprocess.SubprocessError, OSError) as e:
-            self.log(f"Error determining network information: {e}", "ERROR")
-            return None
-    
-    def update_oui_database(self):
-        """Update MAC vendor database from IEEE"""
-        self.log("Updating MAC vendor database...", "INFO")
+    # If we don't have a local file or it failed to load, download it
+    try:
+        debug_print(f"Downloading MAC vendors from {MAC_VENDORS_URL}")
+        response = requests.get(MAC_VENDORS_URL)
+        with open(MAC_VENDORS_FILE, 'wb') as f:
+            f.write(response.content)
         
-        try:
-            # Download the OUI database from IEEE
-            response = requests.get('http://standards-oui.ieee.org/oui/oui.csv')
-            response.raise_for_status()
-            
-            # Save the database
-            with open(OUI_FILE, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-                
-            self.log("MAC vendor database updated successfully", "SUCCESS")
-            
-        except (requests.RequestException, IOError) as e:
-            self.log(f"Error updating MAC vendor database: {e}", "ERROR")
-    
-    def lookup_vendor(self, mac):
-        """Look up vendor from MAC address using OUI database"""
-        if not mac or not os.path.exists(OUI_FILE):
-            return "Unknown"
-        
-        # Format MAC prefix for lookup
-        mac_prefix = mac.replace(':', '').upper()[0:6]
-        
-        try:
-            with open(OUI_FILE, 'r', encoding='utf-8') as f:
-                for line in f:
-                    if mac_prefix in line:
-                        parts = line.strip().split(',')
-                        if len(parts) >= 3:
-                            return parts[2].strip('"')
-        except IOError as e:
-            self.log(f"Error reading OUI database: {e}", "ERROR")
-            
+        with open(MAC_VENDORS_FILE, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            count = 0
+            for row in reader:
+                if len(row) >= 2:
+                    mac_prefix = row[1].strip().replace('-', '').upper()
+                    vendor = row[2].strip()
+                    MAC_VENDORS[mac_prefix] = vendor
+                    count += 1
+        debug_print(f"Loaded {count} MAC vendor entries from downloaded file")
+    except Exception as e:
+        debug_print(f"Error downloading MAC vendors: {e}")
+
+def get_mac_vendor(mac_address):
+    """Look up vendor for a MAC address"""
+    if not mac_address:
         return "Unknown"
     
-    def scan_network(self, intensive=False):
-        """Scan the network for connected devices"""
-        if not self.network_info:
-            self.log("Cannot scan network: network information not available", "ERROR")
-            return {}
-        
-        network = self.network_info["network"]
-        self.log(f"Scanning network: {network}...", "INFO")
-        
-        current_time = datetime.now()
-        connected_devices = {}
-        
-        try:
-            if intensive:
-                # Perform intensive scan with nmap
-                self.log("Starting intensive network scan (this may take several minutes)...", "INFO")
-                
-                # Generate output filename with timestamp
-                timestamp = current_time.strftime("%Y%m%d_%H%M%S")
-                output_file = f"{SCAN_DIR}/scan_{timestamp}"
-                
-                # Run nmap with XML output
-                nmap_cmd = [
-                    'nmap', '-sS', '-sV', '-O', '--osscan-guess', 
-                    '-T4', network, '-oX', f"{output_file}.xml"
-                ]
-                
-                # Execute nmap scan with progress monitoring
-                process = subprocess.Popen(
-                    nmap_cmd, 
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True
-                )
-                
-                # Show progress
-                for line in iter(process.stdout.readline, ''):
-                    if "Nmap scan report for" in line:
-                        ip = line.split("for ")[1].strip()
-                        self.log(f"Scanning: {ip}", "INFO")
-                    elif "% done" in line:
-                        print(f"\r{line.strip()}", end='')
-                    
-                process.stdout.close()
-                return_code = process.wait()
-                
-                if return_code != 0:
-                    self.log(f"Nmap scan failed with return code {return_code}", "ERROR")
-                else:
-                    self.log(f"Intensive scan complete! Results saved to {output_file}.xml", "SUCCESS")
-                
-                # Parse XML output to get device information
-                try:
-                    # Simple XML parsing to extract basic information
-                    with open(f"{output_file}.xml", 'r') as f:
-                        xml_content = f.read()
-                        
-                    # Extract hosts with IP and MAC
-                    host_blocks = re.findall(r'<host[^>]*>(.*?)</host>', xml_content, re.DOTALL)
-                    
-                    for host in host_blocks:
-                        # Extract IP address
-                        ip_match = re.search(r'<address addr="([^"]+)" addrtype="ipv4"', host)
-                        if not ip_match:
-                            continue
-                            
-                        ip = ip_match.group(1)
-                        
-                        # Extract MAC address
-                        mac_match = re.search(r'<address addr="([^"]+)" addrtype="mac"', host)
-                        mac = mac_match.group(1) if mac_match else None
-                        
-                        # Extract hostname if available
-                        hostname_match = re.search(r'<hostname name="([^"]+)"', host)
-                        hostname = hostname_match.group(1) if hostname_match else ""
-                        
-                        # Create device entry
-                        device = {
-                            "ip": ip,
-                            "connected": True,
-                            "last_seen": current_time.isoformat(),
-                            "first_seen": current_time.isoformat()
-                        }
-                        
-                        if mac:
-                            device["mac"] = mac
-                            vendor = self.lookup_vendor(mac)
-                            device["vendor"] = vendor
-                            
-                        if hostname:
-                            device["name"] = hostname
-                            
-                        connected_devices[ip] = device
-                        
-                except Exception as e:
-                    self.log(f"Error parsing nmap XML output: {e}", "ERROR")
-            
-            else:
-                # Perform standard scan with ping sweep
-                ping_cmd = ['nmap', '-sn', network]
-                ping_result = subprocess.run(ping_cmd, capture_output=True, text=True)
-                
-                # Extract IP addresses from nmap output
-                ip_matches = re.finditer(r'Nmap scan report for (?:([^\s]+) )?\(([0-9.]+)\)', ping_result.stdout)
-                
-                for match in ip_matches:
-                    hostname = match.group(1)
-                    ip = match.group(2)
-                    
-                    # Skip local IP
-                    if ip == self.network_info["ip_address"]:
-                        continue
-                        
-                    # Try to get MAC address for this IP
-                    mac = self.get_mac_address(ip)
-                    
-                    # Create device entry
-                    device = {
-                        "ip": ip,
-                        "connected": True,
-                        "last_seen": current_time.isoformat(),
-                        "first_seen": current_time.isoformat()
-                    }
-                    
-                    if mac:
-                        device["mac"] = mac
-                        vendor = self.lookup_vendor(mac)
-                        device["vendor"] = vendor
-                        
-                    if hostname:
-                        device["name"] = hostname
-                        
-                    connected_devices[ip] = device
-            
-            self.log(f"Found {len(connected_devices)} active devices on the network", "INFO")
-            return connected_devices
-            
-        except (subprocess.SubprocessError, OSError) as e:
-            self.log(f"Error scanning network: {e}", "ERROR")
-            return {}
+    # Try different prefix lengths
+    for i in range(8, 0, -1):
+        prefix = mac_address.upper().replace(':', '')[:i]
+        if prefix in MAC_VENDORS:
+            return MAC_VENDORS[prefix]
     
-    def get_mac_address(self, ip):
-        """Get MAC address for an IP using arp"""
-        try:
-            arp_cmd = subprocess.run(['arp', '-n', ip], capture_output=True, text=True)
-            mac_match = re.search(r'([0-9a-f]{2}(?::[0-9a-f]{2}){5})', arp_cmd.stdout, re.IGNORECASE)
-            
-            if mac_match:
-                return mac_match.group(1).lower()
-            else:
-                # Try to ping the device to update ARP cache and try again
-                subprocess.run(['ping', '-c', '1', '-W', '1', ip], 
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                
-                arp_cmd = subprocess.run(['arp', '-n', ip], capture_output=True, text=True)
-                mac_match = re.search(r'([0-9a-f]{2}(?::[0-9a-f]{2}){5})', arp_cmd.stdout, re.IGNORECASE)
-                
-                if mac_match:
-                    return mac_match.group(1).lower()
-                    
-                return None
-                
-        except (subprocess.SubprocessError, OSError) as e:
-            self.log(f"Error getting MAC address for {ip}: {e}", "DEBUG")
-            return None
-    
-    def update_device_status(self, scan_results):
-        """Update device status based on scan results"""
-        current_time = datetime.now()
-        notifications = []
+    return "Unknown"
+
+def get_mac_address(ip_address):
+    """Get MAC address for an IP using ARP"""
+    debug_print(f"Getting MAC address for {ip_address}")
+    try:
+        # First ping the IP to ensure it's in the ARP table
+        ping_cmd = ['ping', '-c', '1', '-W', '1', ip_address]
+        subprocess.run(ping_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
-        # Check for new or reconnected devices
-        for ip, device in scan_results.items():
-            if ip in self.devices:
-                existing_device = self.devices[ip]
-                
-                # Update device information
-                existing_device["last_seen"] = current_time.isoformat()
-                existing_device["ip"] = ip  # Ensure IP is updated
-                
-                # Update MAC address if it's missing but we found it now
-                if "mac" not in existing_device and "mac" in device:
-                    existing_device["mac"] = device["mac"]
-                    existing_device["vendor"] = device["vendor"]
-                
-                # Update hostname if it's missing but we found it now
-                if "name" not in existing_device and "name" in device:
-                    existing_device["name"] = device["name"]
-                
-                # Force rescan if requested
-                if self.rescan_hosts:
-                    if "mac" in device:
-                        existing_device["mac"] = device["mac"]
-                        existing_device["vendor"] = device["vendor"]
-                    if "name" in device:
-                        existing_device["name"] = device["name"]
-                
-                # Check if it was previously disconnected
-                if not existing_device.get("connected", True):
-                    existing_device["connected"] = True
-                    
-                    # Create notification for reconnected device
-                    if self.notify:
-                        notifications.append({
-                            "event": "connected",
-                            "ip": ip,
-                            "mac": existing_device.get("mac", ""),
-                            "name": existing_device.get("name", ""),
-                            "vendor": existing_device.get("vendor", "Unknown")
-                        })
-                        
-                    self.log(f"Device reconnected: {ip} {existing_device.get('name', '')}", "INFO")
-            else:
-                # New device discovered
-                new_device = device.copy()
-                new_device["first_seen"] = current_time.isoformat()
-                new_device["last_seen"] = current_time.isoformat()
-                new_device["connected"] = True
-                
-                self.devices[ip] = new_device
-                
-                # Create notification for new device
-                if self.notify:
-                    notifications.append({
-                        "event": "new",
-                        "ip": ip,
-                        "mac": new_device.get("mac", ""),
-                        "name": new_device.get("name", ""),
-                        "vendor": new_device.get("vendor", "Unknown")
-                    })
-                    
-                self.log(f"New device discovered: {ip} {new_device.get('name', '')} {new_device.get('vendor', '')}", "INFO")
+        # Then query the ARP table
+        arp_cmd = ['arp', '-n', ip_address]
+        result = subprocess.run(arp_cmd, capture_output=True, text=True)
         
-        # Check for disconnected devices
-        for ip, device in self.devices.items():
-            if ip not in scan_results and device.get("connected", False):
-                device["connected"] = False
-                
-                # Create notification for disconnected device
-                if self.notify:
-                    notifications.append({
-                        "event": "disconnected",
-                        "ip": ip,
-                        "mac": device.get("mac", ""),
-                        "name": device.get("name", ""),
-                        "vendor": device.get("vendor", "Unknown")
-                    })
-                    
-                self.log(f"Device disconnected: {ip} {device.get('name', '')}", "INFO")
-        
-        # Send notifications
-        for notification in notifications:
-            self.send_notification(notification)
-        
-        return len(notifications) > 0
-    
-    def send_notification(self, event_data):
-        """Send notification through Unix socket"""
-        if not self.notify:
-            return
-            
-        try:
-            # Create client socket
-            client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            
-            # Try to connect to the socket
-            try:
-                client.connect(self.socket_path)
-            except socket.error:
-                self.log(f"Could not connect to notification socket at {self.socket_path}", "WARNING")
-                self.log("Make sure the notifier script is running", "WARNING")
-                return
-                
-            # Send JSON event data
-            message = json.dumps(event_data)
-            client.sendall(message.encode('utf-8'))
-            client.close()
-            
-        except Exception as e:
-            self.log(f"Error sending notification: {e}", "ERROR")
-    
-    def print_table(self):
-        """Print a formatted table of connected devices"""
-        # Clear screen if requested
-        if self.clear_screen:
-            os.system('clear')
-            
-        # Print table header
-        current_time = datetime.now()
-        print(f"\n🌐 NETWORK DEVICES - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"Network: {self.network_info['network']} (Interface: {self.network_info['interface']})")
-        print("-" * 110)
-        print(f"{'STATUS':<10} {'IP ADDRESS':<15} {'MAC ADDRESS':<18} {'VENDOR':<25} {'NAME':<20} {'UPTIME':<20}")
-        print("-" * 110)
-        
-        # Sort devices by IP address
-        sorted_ips = sorted(self.devices.keys(), 
-                           key=lambda ip: [int(octet) for octet in ip.split('.')])
-        
-        # Print device information
-        for ip in sorted_ips:
-            device = self.devices[ip]
-            
-            # Get status
-            if device.get("connected", False):
-                status = "🟢 ONLINE"
-                
-                # Calculate uptime
-                if "first_seen" in device:
-                    first_seen = datetime.fromisoformat(device["first_seen"])
-                    uptime = current_time - first_seen
-                    uptime_str = self.format_uptime(uptime)
-                else:
-                    uptime_str = "Unknown"
-            else:
-                status = "🔴 OFFLINE"
-                uptime_str = ""
-                
-                # Skip offline devices unless in debug mode
-                if not self.debug:
-                    continue
-            
-            # Print device row
-            print(f"{status:<10} {ip:<15} {device.get('mac', ''):<18} {device.get('vendor', 'Unknown'):<25} "
-                  f"{device.get('name', ''):<20} {uptime_str:<20}")
-            
-        print("-" * 110)
-        print(f"Total devices: {len(self.devices)} ({sum(1 for d in self.devices.values() if d.get('connected', False))} online)")
-    
-    def format_uptime(self, delta):
-        """Format timedelta as readable uptime string"""
-        days = delta.days
-        hours, remainder = divmod(delta.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        
-        if days > 0:
-            return f"{days}d {hours}h {minutes}m"
-        elif hours > 0:
-            return f"{hours}h {minutes}m {seconds}s"
+        # Extract MAC address using regex
+        match = re.search(r'([0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5})', result.stdout)
+        if match:
+            return match.group(1).lower()
         else:
-            return f"{minutes}m {seconds}s"
+            debug_print(f"No MAC address found for {ip_address}")
+            return None
+    except Exception as e:
+        debug_print(f"Error getting MAC address: {e}")
+        return None
+
+def get_default_gateway():
+    """Detect the default gateway IP address"""
+    try:
+        # Run the route command to get the default gateway
+        result = subprocess.run(['ip', 'route', 'show', 'default'], 
+                               capture_output=True, text=True, check=True)
+        
+        # Extract the gateway IP address using regex
+        match = re.search(r'default via (\d+\.\d+\.\d+\.\d+)', result.stdout)
+        if match:
+            gateway_ip = match.group(1)
+            debug_print(f"Default gateway detected: {gateway_ip}")
+            return gateway_ip
+        else:
+            debug_print("Could not find default gateway in route output")
+            return None
+    except subprocess.SubprocessError as e:
+        debug_print(f"Error detecting default gateway: {e}")
+        return None
+
+def get_network_range(gateway_ip):
+    """Determine the network range based on the gateway IP"""
+    # Simple approach: replace the last octet with 0/24
+    network = gateway_ip.rsplit('.', 1)[0] + '.0/24'
+    return network
+
+def scan_network(network_range, rescan_all=False):
+    """Perform an nmap scan of the specified network range"""
+    debug_print(f"Scanning network {network_range} for hosts...")
     
-    def run(self):
-        """Run the network monitor"""
-        try:
-            # If intensive scan requested, run it once and exit
-            if self.intensive_scan:
-                self.log("Starting intensive network scan...", "INFO")
-                scan_results = self.scan_network(intensive=True)
-                self.update_device_status(scan_results)
-                self.save_devices()
-                self.log("Intensive scan completed", "SUCCESS")
-                return
-                
-            # Initial scan
-            self.log("Starting network monitor...", "INFO")
-            scan_results = self.scan_network()
-            self.update_device_status(scan_results)
-            self.save_devices()
+    # Load previous results to check which devices we already know
+    previous_results = load_previous_scan_results()
+    
+    try:
+        # Run nmap with -sn option (ping scan - no port scan)
+        nmap_cmd = ['nmap', '-sn', network_range]
+        result = subprocess.run(nmap_cmd, capture_output=True, text=True, check=True)
+        
+        # Extract hosts that are up
+        hosts = re.findall(r'Nmap scan report for ([^\s]+)(?:\s+\((\d+\.\d+\.\d+\.\d+)\))?', result.stdout)
+        
+        # Process the results
+        active_hosts = []
+        for host in hosts:
+            if host[1]:  # IP address in second group
+                hostname = host[0]
+                ip = host[1]
+            else:  # IP address in first group
+                hostname = ''
+                ip = host[0]
             
-            # Print initial table if requested
-            if self.table_mode:
-                self.print_table()
-                
-            # If no interval specified, exit after first scan
-            if not self.interval:
-                return
-                
-            # Setup signal handler for graceful exit
-            def signal_handler(sig, frame):
-                self.log("\nExiting network monitor...", "INFO")
-                self.save_devices()
-                sys.exit(0)
-                
-            signal.signal(signal.SIGINT, signal_handler)
+            # Check if this IP is already in our database
+            existing_device = None
+            for mac, device in previous_results.items():
+                if device.get('ip') == ip and not rescan_all:
+                    existing_device = device
+                    break
             
-            # Continuous scanning
-            self.log(f"Monitoring network every {self.interval} seconds. Press Ctrl+C to stop.", "INFO")
+            if existing_device and not rescan_all:
+                # Use existing information for this device
+                active_hosts.append({
+                    'ip': ip,
+                    'hostname': existing_device.get('hostname', 'Unknown'),
+                    'mac': existing_device.get('mac'),
+                    'vendor': existing_device.get('vendor', 'Unknown')
+                })
+                debug_print(f"Using cached information for {ip}")
+            else:
+                # New device or rescan requested - get full information
+                debug_print(f"Getting detailed information for {ip}" + 
+                           (" (forced rescan)" if rescan_all else ""))
+                
+                # Try to resolve hostname if it's not provided by nmap
+                if not hostname:
+                    try:
+                        hostname = socket.getfqdn(ip)
+                        # If getfqdn just returns the IP, it didn't resolve
+                        if hostname == ip:
+                            # Try gethostbyaddr instead
+                            try:
+                                hostname = socket.gethostbyaddr(ip)[0]
+                            except socket.herror:
+                                hostname = "Unknown"
+                    except Exception:
+                        hostname = "Unknown"
+                
+                # Get MAC address and vendor
+                mac_address = get_mac_address(ip)
+                
+                # If rescan_all is true, always lookup the vendor, even if it was known before
+                if rescan_all and mac_address and existing_device is not None and 'mac' in existing_device and existing_device['mac'] == mac_address:
+                    # Still the same MAC address, force a vendor lookup from the OUI database
+                    vendor = get_mac_vendor(mac_address)
+                    debug_print(f"Forced vendor lookup for {mac_address}: {vendor}")
+                else:
+                    vendor = get_mac_vendor(mac_address) if mac_address else "Unknown"
+                
+                active_hosts.append({
+                    'ip': ip, 
+                    'hostname': hostname,
+                    'mac': mac_address,
+                    'vendor': vendor
+                })
             
-            while True:
-                # Wait for the next scan
-                time.sleep(self.interval)
-                
-                # Perform scan
-                scan_results = self.scan_network()
-                changes = self.update_device_status(scan_results)
-                self.save_devices()
-                
-                # Print table if in table mode or if changes detected
-                if self.table_mode or changes:
-                    self.print_table()
-                    
-        except KeyboardInterrupt:
-            self.log("\nExiting network monitor...", "INFO")
-            self.save_devices()
-        except Exception as e:
-            self.log(f"Error in network monitor: {e}", "ERROR")
-            self.save_devices()
+        return active_hosts
+    except subprocess.SubprocessError as e:
+        debug_print(f"Error scanning network: {e}")
+        return []
 
 def parse_arguments():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(description='NetMon - Network Device Monitor')
-    
-    parser.add_argument('-D', '--debug', action='store_true',
+    parser = argparse.ArgumentParser(description='Network monitoring tool')
+    parser.add_argument('-D', '--debug', action='store_true', 
                         help='Enable debug output')
-    parser.add_argument('-i', '--interval', type=int, 
-                        help='Scan interval in seconds (default: run once)')
+    parser.add_argument('-i', '--interval', type=int, default=0,
+                        help='Scan interval in seconds (default: run once and exit)')
     parser.add_argument('-T', '--table', action='store_true',
                         help='Print a table of connected hosts')
     parser.add_argument('-C', '--clear', action='store_true',
                         help='Clear screen before each output')
     parser.add_argument('-N', '--notify', action='store_true',
                         help='Send notifications when devices connect/disconnect')
-    parser.add_argument('-S', '--socket', default=DEFAULT_SOCKET_PATH,
-                        help=f'Path to notification socket (default: {DEFAULT_SOCKET_PATH})')
+    parser.add_argument('-S', '--socket', default='/tmp/netmon_socket',
+                        help='Path to the notification socket (default: /tmp/netmon_socket)')
     parser.add_argument('-H', '--rescan-hosts', action='store_true',
-                        help='Force rescan of MAC, hostname and vendor info for all devices')
+                        help='Force rescan of MAC, hostname and vendor information for all devices')
     parser.add_argument('-I', '--intensive-scan', action='store_true',
-                        help='Perform intensive nmap scan on the entire network')
+                        help='Perform intensive nmap scan on each connected device')
     parser.add_argument('-U', '--update-vendors-only', action='store_true',
-                        help='Update MAC vendor information only')
-    parser.add_argument('-v', '--version', action='version',
-                        version=f'NetMon v{VERSION}')
-    
+                        help='Update MAC vendor information only, without scanning the network')
     return parser.parse_args()
 
+def load_previous_scan_results():
+    """Load previous scan results from JSON file"""
+    try:
+        if os.path.exists(SCAN_RESULTS_FILE):
+            with open(SCAN_RESULTS_FILE, 'r') as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        debug_print(f"Error loading previous scan results: {e}")
+        return {}
+
+def save_scan_results(active_hosts, notify=False, socket_path='/tmp/netmon_socket'):
+    """Save scan results to JSON file"""
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Load previous results to preserve history data
+    previous_results = load_previous_scan_results()
+    
+    # Track connected/disconnected devices
+    connected_devices = []
+    
+    # Update the results with new scan data
+    for host in active_hosts:
+        if host['mac']:
+            mac = host['mac']
+            if mac in previous_results:
+                # Check if device was previously disconnected
+                if previous_results[mac]['status'] != "connected":
+                    debug_print(f"Device connected: {host['ip']} ({host['mac']}) - {host['vendor']}")
+                    connected_devices.append(mac)
+                    # Update connection time for uptime calculation
+                    previous_results[mac]['connection_time'] = current_time
+                    
+                    # Send notification if enabled
+                    if notify and not previous_results[mac].get('ignore', False):
+                        send_notification(socket_path, 'connected', previous_results[mac])
+                
+                # Update existing record
+                previous_results[mac]['ip'] = host['ip']
+                previous_results[mac]['hostname'] = host['hostname'] if host['hostname'] else "Unknown"
+                previous_results[mac]['vendor'] = host['vendor']
+                previous_results[mac]['last_seen'] = current_time
+                previous_results[mac]['status'] = "connected"
+            else:
+                # New device found
+                debug_print(f"New device found: {host['ip']} ({host['mac']}) - {host['vendor']}")
+                connected_devices.append(mac)
+                
+                # Create new record
+                previous_results[mac] = {
+                    'ip': host['ip'],
+                    'hostname': host['hostname'] if host['hostname'] else "Unknown",
+                    'mac': mac,
+                    'vendor': host['vendor'],
+                    'name': "",
+                    'first_seen': current_time,
+                    'last_seen': current_time,
+                    'connection_time': current_time,
+                    'status': "connected",
+                    'ignore': False
+                }
+                
+                # Send notification if enabled
+                if notify:
+                    send_notification(socket_path, 'new', previous_results[mac])
+    
+    # Check for devices that have disconnected
+    for mac, device in previous_results.items():
+        # If the device was connected but not in the current scan
+        if device['status'] == "connected" and mac not in [h['mac'] for h in active_hosts if h['mac']]:
+            previous_results[mac]['status'] = "disconnected"
+            debug_print(f"Device disconnected: {device['ip']} ({mac}) - {device['vendor']}")
+            
+            # Send notification if enabled
+            if notify and not device.get('ignore', False):
+                send_notification(socket_path, 'disconnected', device)
+    
+    # Write updated results back to file
+    try:
+        with open(SCAN_RESULTS_FILE, 'w') as f:
+            json.dump(previous_results, f, indent=2)
+        
+        # Set permissions to make the file readable and writable by everyone
+        os.chmod(SCAN_RESULTS_FILE, 0o666)
+        debug_print(f"Saved scan results to {SCAN_RESULTS_FILE}")
+    except Exception as e:
+        debug_print(f"Error saving scan results: {e}")
+
+def print_hosts_table(hosts_data):
+    """Print a formatted table of connected hosts"""
+    # Only show this output even without debug mode
+    if not hosts_data:
+        print("No hosts found")
+        return
+    
+    # Get current time for uptime calculation
+    current_time = datetime.now()
+    
+    # Print header
+    print("\nNETWORK HOSTS:")
+    print("=" * 100)
+    print(f"{'NAME':<20} {'IP':<16} {'MAC':<18} {'CONNECTED':<12} {'VENDOR':<20} {'HOSTNAME'}")
+    print("-" * 100)
+    
+    # Sort hosts by IP address
+    try:
+        sorted_hosts = sorted(hosts_data.items(), key=lambda x: socket.inet_aton(x[1]['ip']))
+    except:
+        # Fallback sorting method if IP address sorting fails
+        sorted_hosts = sorted(hosts_data.items(), key=lambda x: x[1]['ip'])
+    
+    # Print each host
+    for mac, host in sorted_hosts:
+        # Skip hosts that are not connected
+        if host.get('status') != "connected":
+            continue
+            
+        # Format name and handle ignored hosts
+        name = host.get('name', '')
+        if not name:
+            name = ""  # Ensure empty string if no name is set
+        if host.get('ignore', False):
+            name = f"# {name}"
+        
+        # Calculate connection time in minutes
+        conn_time = "Unknown"
+        try:
+            # Use connection_time if available, otherwise use first_seen or last_seen as fallback
+            if 'connection_time' in host:
+                time_field = host['connection_time']
+            elif 'first_seen' in host:
+                time_field = host['first_seen']
+            elif 'last_seen' in host:
+                time_field = host['last_seen']
+            else:
+                time_field = None
+                
+            if time_field:
+                connection_time = datetime.strptime(time_field, "%Y-%m-%d %H:%M:%S")
+                minutes_connected = int((current_time - connection_time).total_seconds() / 60)
+                conn_time = f"{minutes_connected} min"
+        except Exception as e:
+            debug_print(f"Error calculating connection time: {e}")
+            conn_time = "Error"
+        
+        # Format vendor and hostname
+        vendor = host.get('vendor', 'Unknown')
+        hostname = host.get('hostname', 'Unknown')
+        
+        # Print the row
+        print(f"{name:<20} {host['ip']:<16} {host['mac']:<18} {conn_time:<12} {vendor:<20} {hostname}")
+    
+    # Print recently disconnected devices (within last 10 minutes)
+    recent_disconnects = []
+    
+    for mac, host in sorted_hosts:
+        # Only check disconnected devices
+        if host.get('status') != "disconnected":
+            continue
+            
+        # Calculate time since disconnect
+        if 'last_seen' in host:
+            try:
+                last_seen = datetime.strptime(host['last_seen'], "%Y-%m-%d %H:%M:%S")
+                time_since_disconnect = (current_time - last_seen).total_seconds() / 60
+                
+                # If disconnected within the last 10 minutes, add to the list
+                if time_since_disconnect <= 10:
+                    recent_disconnects.append((mac, host, time_since_disconnect))
+            except Exception:
+                pass
+    
+    # If we have recent disconnects, print them
+    if recent_disconnects:
+        print("\nRECENTLY DISCONNECTED DEVICES (Last 10 minutes):")
+        print("=" * 100)
+        print(f"{'NAME':<20} {'IP':<16} {'MAC':<18} {'DISCONNECTED':<20} {'VENDOR'}")
+        print("-" * 100)
+        
+        # Sort by disconnect time (most recent first)
+        recent_disconnects.sort(key=lambda x: x[2])
+        
+        for mac, host, minutes in recent_disconnects:
+            # Format name
+            name = host.get('name', '')
+            if not name:
+                name = ""
+            if host.get('ignore', False):
+                name = f"# {name}"
+            
+            # Format time since disconnect
+            if minutes < 1:
+                time_str = "< 1 min ago"
+            else:
+                time_str = f"{int(minutes)} min ago"
+                
+            # Format vendor
+            vendor = host.get('vendor', 'Unknown')
+            
+            # Print the row
+            print(f"{name:<20} {host['ip']:<16} {mac:<18} {time_str:<20} {vendor}")
+
+def send_notification(socket_path, event_type, device):
+    """Send notification about device connection/disconnection events"""
+    if not device.get('mac'):
+        return
+    
+    # Skip notification if device is marked as ignored
+    if device.get('ignore', False):
+        return
+    
+    try:
+        # Create notification data
+        notification = {
+            'event': event_type,
+            'ip': device.get('ip', ''),
+            'mac': device.get('mac', ''),
+            'name': device.get('name', ''),
+            'vendor': device.get('vendor', 'Unknown'),
+            'hostname': device.get('hostname', 'Unknown'),
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # Create Unix domain socket
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        
+        # Connect to the socket
+        try:
+            sock.connect(socket_path)
+            # Send the notification as JSON
+            sock.sendall(json.dumps(notification).encode('utf-8'))
+            debug_print(f"Notification sent: {event_type} - {device.get('ip')} ({device.get('mac')})")
+        except socket.error as e:
+            debug_print(f"Failed to connect to notification socket: {e}")
+        finally:
+            sock.close()
+    except Exception as e:
+        debug_print(f"Error sending notification: {e}")
+
+def perform_intensive_scan(device):
+    """Perform an intensive nmap scan on a specific device"""
+    if not device.get('mac') or not device.get('ip'):
+        debug_print(f"Cannot scan device: missing MAC or IP")
+        return False
+    
+    mac = device['mac'].replace(':', '')
+    ip = device['ip']
+    
+    # Create directory structure: ./scans/<datetime>/<mac>
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    scan_dir = f"./scans/{current_time}/{mac}"
+    
+    # Ensure the directory exists
+    try:
+        os.makedirs(scan_dir, exist_ok=True)
+        debug_print(f"Created scan directory: {scan_dir}")
+    except Exception as e:
+        debug_print(f"Error creating scan directory: {e}")
+        return False
+    
+    output_file = f"{scan_dir}/scan"
+    
+    debug_print(f"Performing intensive scan on {ip} ({device.get('hostname', 'Unknown')}, {device.get('vendor', 'Unknown')})")
+    
+    try:
+        # Run intensive nmap scan
+        nmap_cmd = ['nmap', '-p-', '-T4', '-A', '-v', '-Pn', '-oA', output_file, ip]
+        debug_print(f"Running command: {' '.join(nmap_cmd)}")
+        
+        result = subprocess.run(nmap_cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            debug_print(f"Scan completed successfully. Results saved to {output_file}.*")
+            return True
+        else:
+            debug_print(f"Scan failed with error code {result.returncode}")
+            debug_print(f"Error: {result.stderr}")
+            return False
+    except Exception as e:
+        debug_print(f"Error performing intensive scan: {e}")
+        return False
+
+def perform_network_intensive_scan(network_range):
+    """Perform an intensive nmap scan on the entire network range with progress display"""
+    if not network_range:
+        debug_print(f"Cannot scan: missing network range")
+        return False
+    
+    # Create directory structure: ./scans/<datetime>/network
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    scan_dir = f"./scans/{current_time}/network"
+    
+    # Ensure the directory exists
+    try:
+        os.makedirs(scan_dir, exist_ok=True)
+        debug_print(f"Created scan directory: {scan_dir}")
+    except Exception as e:
+        debug_print(f"Error creating scan directory: {e}")
+        return False
+    
+    output_file = f"{scan_dir}/network_scan"
+    
+    print(f"Performing intensive scan on entire network range: {network_range}")
+    print(f"This may take a considerable amount of time depending on the network size")
+    print(f"Scan results will be saved to {output_file}.*")
+    
+    try:
+        # Run intensive nmap scan on the entire network with real-time output
+        nmap_cmd = ['nmap', '-sT', '--top-ports', '300', '-T4', '-A', '-vv', '-oA',  output_file, network_range]
+        print(f"\nRunning command: {' '.join(nmap_cmd)}")
+        print("\n" + "=" * 80)
+        print("SCAN PROGRESS (Live Output):")
+        print("=" * 80)
+        
+        # Use Popen instead of run to get live output
+        process = subprocess.Popen(
+            nmap_cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+        
+        scan_started = False
+        
+        # Process live output
+        for line in iter(process.stdout.readline, ''):
+            # Display informative lines about scan progress
+            if any(x in line for x in [
+                'Initiating', 'Scanning', 'Discovered', 'Completed', 
+                '% done', 'seconds', 'finished', 'scanned'
+            ]):
+                print(line.rstrip())
+            # Always show port findings
+            elif 'open' in line and 'port' in line:
+                print(line.rstrip())
+                
+            # Keep track of when the scan starts running
+            if 'Starting Nmap' in line and not scan_started:
+                scan_started = True
+                start_time = datetime.now()
+                print(f"Scan started at {start_time.strftime('%H:%M:%S')}")
+        
+        # Wait for the process to complete and get return code
+        return_code = process.wait()
+        
+        if return_code == 0:
+            end_time = datetime.now()
+            duration = end_time - start_time
+            print("\n" + "=" * 80)
+            print(f"Network scan completed successfully in {duration.seconds//60} minutes, {duration.seconds%60} seconds")
+            print(f"Results saved to {output_file}.*")
+            return True
+        else:
+            print("\n" + "=" * 80)
+            print(f"Network scan failed with error code {return_code}")
+            return False
+    except Exception as e:
+        print(f"\nError performing network scan: {e}")
+        return False
+
 def main():
-    """Main function"""
+    # Parse arguments
+    global DEBUG
     args = parse_arguments()
-    monitor = NetworkMonitor(args)
-    monitor.run()
+    DEBUG = args.debug
+    
+    # Check if script is run as root
+    if os.geteuid() != 0:
+        debug_print("This script requires root privileges to run nmap effectively.")
+        debug_print("Please run with sudo.")
+        sys.exit(1)
+    
+    # Load MAC vendor database
+    load_mac_vendors()
+    
+    # If -H is specified, update all MAC vendors in the database regardless of online status
+    if args.rescan_hosts:
+        debug_print("Rescanning all MAC addresses in the database for vendor information...")
+        devices_data = load_previous_scan_results()
+        updated_count = 0
+        scanned_count = 0
+        
+        for mac, device in devices_data.items():
+            if mac and mac != "Unknown":
+                scanned_count += 1
+                old_vendor = device.get('vendor', "Unknown")
+                
+                # Always print which MAC is being looked up when debug is enabled
+                if DEBUG:
+                    print(f"Looking up vendor for MAC: {mac} (Current: {old_vendor})")
+                
+                new_vendor = get_mac_vendor(mac)
+                if old_vendor != new_vendor:
+                    if DEBUG:
+                        print(f"✓ Updating vendor for {mac}: {old_vendor} -> {new_vendor}")
+                    devices_data[mac]['vendor'] = new_vendor
+                    updated_count += 1
+                else:
+                    if DEBUG:
+                        print(f"- MAC lookup for {mac}: Vendor unchanged ({old_vendor})")
+        
+        if updated_count > 0:
+            print(f"Updated vendor information for {updated_count} out of {scanned_count} devices")
+            # Save the updated data
+            try:
+                with open(SCAN_RESULTS_FILE, 'w') as f:
+                    json.dump(devices_data, f, indent=2)
+                # Set permissions to make the file readable and writable by everyone
+                os.chmod(SCAN_RESULTS_FILE, 0o666)
+                debug_print(f"Saved updated vendor information to {SCAN_RESULTS_FILE}")
+            except Exception as e:
+                debug_print(f"Error saving updated vendor information: {e}")
+        else:
+            print(f"Scanned {scanned_count} devices, no vendor updates needed")
+            
+        # If we're only updating vendors with -H and not doing a network scan, exit
+        if args.update_vendors_only:
+            sys.exit(0)
+    
+    # Get the default gateway
+    gateway_ip = get_default_gateway()
+    if not gateway_ip:
+        debug_print("Failed to determine default gateway. Exiting.")
+        sys.exit(1)
+    
+    # Get the network range
+    network_range = get_network_range(gateway_ip)
+    
+    # Run scan once or periodically based on interval argument
+    try:
+        first_run = True
+        while True:
+            scan_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if not first_run:
+                debug_print(f"\nRunning scan at {scan_time}")
+            
+            # Scan the network
+            active_hosts = scan_network(network_range, args.rescan_hosts)
+            
+            # Save results to JSON file and check for changes
+            save_scan_results(active_hosts, args.notify, args.socket)
+            
+            # Clear screen if -C option is used
+            if args.clear:
+                os.system('clear' if os.name == 'posix' else 'cls')
+            
+            # Display the results only in debug mode
+            debug_print(f"Found {len(active_hosts)} active hosts on the network:")
+            for host in active_hosts:
+                output = f"IP: {host['ip']}"
+                if host['hostname']:
+                    output += f", Hostname: {host['hostname']}"
+                if host['mac']:
+                    output += f", MAC: {host['mac']}"
+                if host['vendor'] != "Unknown":
+                    output += f", Vendor: {host['vendor']}"
+                debug_print(output)
+            
+            # Print the hosts table if the -T option is used
+            if args.table:
+                hosts_data = load_previous_scan_results()
+                print_hosts_table(hosts_data)
+            
+            # Perform intensive scan if -I option is used
+            if args.intensive_scan:
+                # Only perform intensive scan on the entire network range
+                print(f"\nPerforming intensive scan on the entire network range: {network_range}")
+                if perform_network_intensive_scan(network_range):
+                    print(f"Network-wide intensive scan completed successfully")
+                else:
+                    print(f"Network-wide intensive scan failed")
+            
+            # If interval is not set, exit after first scan
+            if args.interval <= 0:
+                break
+                
+            first_run = False
+            debug_print(f"Waiting {args.interval} seconds until next scan...")
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        debug_print("\nScan interrupted by user. Exiting.")
+    except Exception as e:
+        debug_print(f"An error occurred: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
